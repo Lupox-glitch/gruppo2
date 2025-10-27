@@ -32,8 +32,8 @@ def handle_login(data):
     
     # Query with prepared statement
     conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('SELECT * FROM users WHERE email = ?', (email,))
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute('SELECT * FROM users WHERE email = %s', (email,))
     user = cursor.fetchone()
     conn.close()
     
@@ -83,23 +83,23 @@ def handle_register(data):
     
     # Check if email exists (prepared statement)
     conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('SELECT id FROM users WHERE email = ?', (email,))
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute('SELECT id FROM users WHERE email = %s', (email,))
     if cursor.fetchone():
         conn.close()
         return {'success': False, 'error': 'Questa email è già registrata'}
     
     # Insert new user (prepared statement)
     password_hash = hash_password(password)
-    cursor.execute('''
-        INSERT INTO users (email, password_hash, nome, cognome, role)
-        VALUES (?, ?, ?, ?, 'student')
-    ''', (email, password_hash, nome, cognome))
+    cursor.execute(
+        'INSERT INTO users (email, password_hash, nome, cognome, role) VALUES (%s, %s, %s, %s, "student")',
+        (email, password_hash, nome, cognome)
+    )
     
     user_id = cursor.lastrowid
     
     # Create cv_data entry
-    cursor.execute('INSERT INTO cv_data (user_id) VALUES (?)', (user_id,))
+    cursor.execute('INSERT INTO cv_data (user_id) VALUES (%s)', (user_id,))
     
     conn.commit()
     conn.close()
@@ -126,37 +126,34 @@ def handle_update_profile(user_id, data):
         return {'success': False, 'error': 'Email non valida'}
     
     conn = get_db_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(dictionary=True)
     
     # Check if email is used by another user (prepared statement)
-    cursor.execute('SELECT id FROM users WHERE email = ? AND id != ?', (email, user_id))
+    cursor.execute('SELECT id FROM users WHERE email = %s AND id != %s', (email, user_id))
     if cursor.fetchone():
         conn.close()
         return {'success': False, 'error': 'Questa email è già utilizzata'}
     
     # Update users table (prepared statement)
-    cursor.execute('''
-        UPDATE users 
-        SET nome = ?, cognome = ?, email = ?, updated_at = CURRENT_TIMESTAMP
-        WHERE id = ?
-    ''', (nome, cognome, email, user_id))
+    cursor.execute(
+        'UPDATE users SET nome = %s, cognome = %s, email = %s, updated_at = CURRENT_TIMESTAMP WHERE id = %s',
+        (nome, cognome, email, user_id)
+    )
     
     # Update cv_data (prepared statement)
-    cursor.execute('SELECT id FROM cv_data WHERE user_id = ?', (user_id,))
+    cursor.execute('SELECT id FROM cv_data WHERE user_id = %s', (user_id,))
     cv_exists = cursor.fetchone()
     
     if cv_exists:
-        cursor.execute('''
-            UPDATE cv_data
-            SET telefono = ?, data_nascita = ?, citta = ?, 
-                indirizzo = ?, linkedin_url = ?, updated_at = CURRENT_TIMESTAMP
-            WHERE user_id = ?
-        ''', (telefono, data_nascita, citta, indirizzo, linkedin_url, user_id))
+        cursor.execute(
+            'UPDATE cv_data SET telefono = %s, data_nascita = %s, citta = %s, indirizzo = %s, linkedin_url = %s, updated_at = CURRENT_TIMESTAMP WHERE user_id = %s',
+            (telefono, data_nascita, citta, indirizzo, linkedin_url, user_id)
+        )
     else:
-        cursor.execute('''
-            INSERT INTO cv_data (user_id, telefono, data_nascita, citta, indirizzo, linkedin_url)
-            VALUES (?, ?, ?, ?, ?, ?)
-        ''', (user_id, telefono, data_nascita, citta, indirizzo, linkedin_url))
+        cursor.execute(
+            'INSERT INTO cv_data (user_id, telefono, data_nascita, citta, indirizzo, linkedin_url) VALUES (%s, %s, %s, %s, %s, %s)',
+            (user_id, telefono, data_nascita, citta, indirizzo, linkedin_url)
+        )
     
     conn.commit()
     conn.close()
@@ -198,10 +195,10 @@ def handle_upload_cv(user_id, files):
     
     # Update database (prepared statement)
     conn = get_db_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(dictionary=True)
     
     # Get old CV path to delete it
-    cursor.execute('SELECT cv_file_path FROM cv_data WHERE user_id = ?', (user_id,))
+    cursor.execute('SELECT cv_file_path FROM cv_data WHERE user_id = %s', (user_id,))
     old_cv = cursor.fetchone()
     
     if old_cv and old_cv['cv_file_path']:
@@ -211,11 +208,10 @@ def handle_upload_cv(user_id, files):
     
     # Update database
     relative_path = f'uploads/cv/{secure_filename}'
-    cursor.execute('''
-        UPDATE cv_data
-        SET cv_file_path = ?, cv_uploaded_at = CURRENT_TIMESTAMP
-        WHERE user_id = ?
-    ''', (relative_path, user_id))
+    cursor.execute(
+        'UPDATE cv_data SET cv_file_path = %s, cv_uploaded_at = CURRENT_TIMESTAMP WHERE user_id = %s',
+        (relative_path, user_id)
+    )
     
     conn.commit()
     conn.close()
@@ -248,12 +244,11 @@ def handle_add_experience(user_id, data):
     
     # Insert experience (prepared statement)
     conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute('''
-        INSERT INTO experiences 
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute(
+        'INSERT INTO experiences (user_id, tipo, titolo, azienda_istituto, data_inizio, data_fine, is_current, descrizione) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)',
         (user_id, tipo, titolo, azienda_istituto, data_inizio, data_fine, is_current, descrizione)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    ''', (user_id, tipo, titolo, azienda_istituto, data_inizio, data_fine, is_current, descrizione))
+    )
     
     conn.commit()
     conn.close()
@@ -264,16 +259,16 @@ def handle_add_experience(user_id, data):
 def handle_delete_experience(user_id, experience_id):
     """Handle deleting experience with prepared statements"""
     conn = get_db_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(dictionary=True)
     
     # Verify ownership (prepared statement)
-    cursor.execute('SELECT id FROM experiences WHERE id = ? AND user_id = ?', (experience_id, user_id))
+    cursor.execute('SELECT id FROM experiences WHERE id = %s AND user_id = %s', (experience_id, user_id))
     if not cursor.fetchone():
         conn.close()
         return {'success': False, 'error': 'Esperienza non trovata'}
     
     # Delete (prepared statement)
-    cursor.execute('DELETE FROM experiences WHERE id = ? AND user_id = ?', (experience_id, user_id))
+    cursor.execute('DELETE FROM experiences WHERE id = %s AND user_id = %s', (experience_id, user_id))
     
     conn.commit()
     conn.close()
@@ -284,23 +279,22 @@ def handle_delete_experience(user_id, experience_id):
 def get_user_dashboard_data(user_id):
     """Get all data for user dashboard"""
     conn = get_db_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(dictionary=True)
     
     # Get user data (prepared statement)
-    cursor.execute('SELECT * FROM users WHERE id = ?', (user_id,))
+    cursor.execute('SELECT * FROM users WHERE id = %s', (user_id,))
     user = dict(cursor.fetchone())
     
     # Get CV data
-    cursor.execute('SELECT * FROM cv_data WHERE user_id = ?', (user_id,))
+    cursor.execute('SELECT * FROM cv_data WHERE user_id = %s', (user_id,))
     cv_data = cursor.fetchone()
     cv_data = dict(cv_data) if cv_data else {}
     
     # Get experiences
-    cursor.execute('''
-        SELECT * FROM experiences 
-        WHERE user_id = ? 
-        ORDER BY data_inizio DESC
-    ''', (user_id,))
+    cursor.execute(
+        'SELECT * FROM experiences WHERE user_id = %s ORDER BY data_inizio DESC',
+        (user_id,)
+    )
     experiences = [dict(row) for row in cursor.fetchall()]
     
     conn.close()
@@ -375,20 +369,24 @@ def _render_experiences(experiences, tipo):
 def get_admin_dashboard_data():
     """Get all data for admin dashboard"""
     conn = get_db_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(dictionary=True)
     
     # Get all students with their data
-    cursor.execute('''
-        SELECT u.*, cv.cv_file_path, cv.cv_uploaded_at, cv.telefono, cv.data_nascita,
+    cursor.execute(
+        """
+        SELECT u.id, u.email, u.password_hash, u.nome, u.cognome, u.role, u.created_at, u.updated_at,
+               cv.cv_file_path, cv.cv_uploaded_at, cv.telefono, cv.data_nascita,
                COUNT(e.id) as total_experiences
         FROM users u
         LEFT JOIN cv_data cv ON u.id = cv.user_id
         LEFT JOIN experiences e ON u.id = e.user_id
         WHERE u.role = 'student'
-        GROUP BY u.id
+        GROUP BY u.id, u.email, u.password_hash, u.nome, u.cognome, u.role, u.created_at, u.updated_at,
+                 cv.cv_file_path, cv.cv_uploaded_at, cv.telefono, cv.data_nascita
         ORDER BY u.created_at DESC
-    ''')
-    students = [dict(row) for row in cursor.fetchall()]
+        """
+    )
+    students = cursor.fetchall()
     
     # Get statistics
     cursor.execute("SELECT COUNT(*) as total FROM users WHERE role = 'student'")

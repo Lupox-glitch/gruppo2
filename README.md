@@ -1,11 +1,11 @@
 # Sistema di Gestione CV Online - Versione Python
 
-Sistema completo per la gestione di curriculum vitae degli studenti, implementato in Python puro (solo librerie standard, nessun framework).
+Sistema completo per la gestione di curriculum vitae degli studenti, implementato in Python puro (nessun framework). Backend ora su MySQL.
 
 ## 🚀 Caratteristiche
 
-- ✅ Zero dipendenze esterne: usa solo la libreria standard Python
-- ✅ Database SQLite: nessun server database da installare
+- ✅ Dipendenze minime: solo il driver MySQL per Python
+- ✅ Database MySQL: schema ottimizzato InnoDB/UTF8MB4
 - ✅ Autenticazione sicura: password hashate con SHA-256 + salt
 - ✅ Upload CV: supporto PDF con validazione (max 5MB)
 - ✅ Gestione esperienze: lavorative e formative
@@ -14,30 +14,43 @@ Sistema completo per la gestione di curriculum vitae degli studenti, implementat
 
 ## 📋 Requisiti
 
-- Python 3.7+ (già installato su Windows 10/11)
-- Nessun'altra dipendenza!
+- Python 3.8+
+- MySQL Server 8+
+- Pip per installare le dipendenze
 
-## � Installazione
+## 🔧 Installazione rapida (Windows PowerShell)
 
-1. Verifica Python installato:
+1) Verifica Python
    ```powershell
    python --version
    ```
-   Se non installato, scarica da https://www.python.org/downloads/
 
-2. Inizializza il database:
+2) Installa dipendenze Python
    ```powershell
-   python init_db.py
+   pip install -r requirements.txt
    ```
-   Questo crea il database SQLite e gli utenti di test
 
-3. Avvia il server:
+3) Prepara MySQL (da client MySQL)
+   Esegui lo script `database.sql` per creare database e tabelle:
+   ```sql
+   SOURCE path\\to\\gruppo2\\database.sql;
+   ```
+
+4) Configura variabili d'ambiente (opzionale, hanno default)
+   ```powershell
+   $Env:MYSQL_HOST = "localhost"
+   $Env:MYSQL_PORT = "3306"
+   $Env:MYSQL_USER = "root"
+   $Env:MYSQL_PASSWORD = ""
+   $Env:MYSQL_DB = "cv_management"
+   ```
+
+5) Avvia il server
    ```powershell
    python server.py
    ```
 
-4. Apri il browser:
-   http://localhost:8000
+6) Apri il browser: http://localhost:8000
 
 ## 👤 Credenziali di Test
 
@@ -54,7 +67,7 @@ Studente:
 ```
 gruppo2/
 ├── server.py              # Server HTTP con routing e sessioni
-├── database.py            # Gestione database SQLite
+├── database.py            # Gestione database MySQL (mysql-connector)
 ├── handlers.py            # Logica business (login, CV, esperienze)
 ├── init_db.py             # Script inizializzazione database
 │
@@ -74,7 +87,7 @@ gruppo2/
 └── uploads/              # CV caricati (creata automaticamente)
 ```
 
-## � Sicurezza
+## 🔐 Sicurezza
 
 - Password hashing: SHA-256 con salt
 - Prepared statements: protezione da SQL injection
@@ -114,9 +127,11 @@ API
 - POST /api/add-experience — Aggiungi esperienza
 - POST /api/delete-experience — Elimina esperienza
 
-## � Troubleshooting
+## 🧰 Troubleshooting
 
 Porta già in uso: cambia PORT in server.py
+
+Errore connessione MySQL: verifica credenziali/host/porta o imposta le variabili d'ambiente.
 
 Permessi upload: assicurati che la cartella uploads/ sia scrivibile (viene creata automaticamente all'avvio).
 

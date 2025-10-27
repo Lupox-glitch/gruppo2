@@ -12,7 +12,6 @@ import os
 import mimetypes
 import secrets
 import hashlib
-import sqlite3
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -21,7 +20,6 @@ HOST = 'localhost'
 PORT = 8000
 BASE_DIR = Path(__file__).parent
 UPLOAD_DIR = BASE_DIR / 'uploads' / 'cv'
-DB_PATH = BASE_DIR / 'cv_management.db'
 SECRET_KEY = secrets.token_hex(32)
 
 # Session storage (in-memory, for simplicity)
@@ -414,11 +412,11 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
 
 
 def init_database():
-    """Initialize SQLite database"""
+    """Initialize database (MySQL)"""
     from database import create_tables, create_default_users
     create_tables()
     create_default_users()
-    print(f"✓ Database initialized: {DB_PATH}")
+    print("✓ Database initialized (MySQL)")
 
 
 def main():
