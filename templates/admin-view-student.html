@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualizza Studente - Sistema Gestione CV</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>CV Manager</h2>
+                <span class="badge badge-admin">Admin</span>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="/admin-dashboard" class="nav-item">
+                    <span>📊</span> Dashboard
+                </a>
+                <a href="/logout" class="nav-item">
+                    <span>🚪</span> Logout
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <p>Benvenuto, {{admin_nome}} {{admin_cognome}}</p>
+            </div>
+        </aside>
+        
+        <main class="main-content">
+            <header class="content-header">
+                <a href="/admin-dashboard" class="btn-secondary">← Torna alla Dashboard</a>
+                <h1>Dettagli Studente</h1>
+            </header>
+            
+            <!-- Informazioni Personali -->
+            <section class="dashboard-section">
+                <div class="section-header">
+                    <h2>Informazioni Personali</h2>
+                </div>
+                
+                <div class="card">
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>Nome:</label>
+                            <span>{{student_nome}}</span>
+                        </div>
+                        
+                        <div class="info-item">
+                            <label>Cognome:</label>
+                            <span>{{student_cognome}}</span>
+                        </div>
+                        
+                        <div class="info-item">
+                            <label>Email:</label>
+                            <span>{{student_email}}</span>
+                        </div>
+                        
+                        <div class="info-item">
+                            <label>Data di Nascita:</label>
+                            <span>{{data_nascita}}</span>
+                        </div>
+                        
+                        <div class="info-item">
+                            <label>Telefono:</label>
+                            <span>{{telefono}}</span>
+                        </div>
+                        
+                        <div class="info-item">
+                            <label>Indirizzo:</label>
+                            <span>{{indirizzo}}</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- CV -->
+            <section class="dashboard-section">
+                <div class="section-header">
+                    <h2>Curriculum Vitae</h2>
+                </div>
+                
+                <div class="card">
+                    {{cv_section}}
+                </div>
+            </section>
+            
+            <!-- Esperienze Lavorative -->
+            <section class="dashboard-section">
+                <div class="section-header">
+                    <h2>Esperienze Lavorative</h2>
+                </div>
+                
+                <div class="experiences-grid">
+                    {{esperienze_lavorative}}
+                </div>
+            </section>
+            
+            <!-- Esperienze Formative -->
+            <section class="dashboard-section">
+                <div class="section-header">
+                    <h2>Esperienze Formative</h2>
+                </div>
+                
+                <div class="experiences-grid">
+                    {{esperienze_formative}}
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

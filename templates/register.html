@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrazione - Sistema Gestione CV</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h1>Registrazione</h1>
+                <p>Crea il tuo account</p>
+            </div>
+            
+            {{error_message}}
+            
+            <form method="POST" action="/register" class="login-form" id="registerForm">
+                <div class="form-group">
+                    <label for="nome">Nome:</label>
+                    <input type="text" id="nome" name="nome" required>
+                    <span class="error-message" id="nomeError"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="cognome">Cognome:</label>
+                    <input type="text" id="cognome" name="cognome" required>
+                    <span class="error-message" id="cognomeError"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required>
+                    <span class="error-message" id="emailError"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required>
+                    <span class="error-message" id="passwordError"></span>
+                    <small>Minimo 6 caratteri</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirm_password">Conferma Password:</label>
+                    <input type="password" id="confirm_password" name="confirm_password" required>
+                    <span class="error-message" id="confirmPasswordError"></span>
+                </div>
+                
+                <button type="submit" class="btn-primary">Registrati</button>
+            </form>
+            
+            <div class="login-footer">
+                <p>Hai già un account? <a href="/">Accedi qui</a></p>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/js/validation.js"></script>
+</body>
+</html>

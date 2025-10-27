@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Sistema Gestione CV</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h1>Sistema Gestione CV</h1>
+                <p>Accedi al tuo account</p>
+            </div>
+            
+            {{error_message}}
+            {{success_message}}
+            
+            <form method="POST" action="/login" class="login-form" id="loginForm">
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" name="email" required>
+                    <span class="error-message" id="emailError"></span>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password" required>
+                    <span class="error-message" id="passwordError"></span>
+                </div>
+                
+                <button type="submit" class="btn-primary">Accedi</button>
+            </form>
+            
+            <div class="login-footer">
+                <p>Non hai un account? <a href="/register">Registrati qui</a></p>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/js/validation.js"></script>
+</body>
+</html>

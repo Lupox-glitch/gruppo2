@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin - Sistema Gestione CV</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>CV Manager</h2>
+                <span class="badge badge-admin">Admin</span>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="/admin-dashboard" class="nav-item active">
+                    <span>📊</span> Dashboard
+                </a>
+                <a href="/logout" class="nav-item">
+                    <span>🚪</span> Logout
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <p>Benvenuto, {{user_nome}} {{user_cognome}}</p>
+            </div>
+        </aside>
+        
+        <main class="main-content">
+            <header class="content-header">
+                <h1>Dashboard Amministratore</h1>
+                <p>Gestione completa degli studenti e dei curriculum</p>
+            </header>
+            
+            <!-- Statistiche -->
+            <section class="stats-section">
+                <div class="stat-card">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-content">
+                        <h3>Totale Studenti</h3>
+                        <p class="stat-number">{{total_students}}</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">📄</div>
+                    <div class="stat-content">
+                        <h3>CV Caricati</h3>
+                        <p class="stat-number">{{total_cvs}}</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">💼</div>
+                    <div class="stat-content">
+                        <h3>Esperienze Lavorative</h3>
+                        <p class="stat-number">{{total_work_exp}}</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">🎓</div>
+                    <div class="stat-content">
+                        <h3>Esperienze Formative</h3>
+                        <p class="stat-number">{{total_edu_exp}}</p>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Lista Studenti -->
+            <section class="dashboard-section">
+                <div class="section-header">
+                    <h2>Studenti Registrati</h2>
+                    <input type="text" id="searchInput" placeholder="Cerca studente..." class="search-input">
+                </div>
+                
+                <div class="card">
+                    <table class="students-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nome</th>
+                                <th>Cognome</th>
+                                <th>Email</th>
+                                <th>Data Nascita</th>
+                                <th>CV</th>
+                                <th>Azioni</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentsTableBody">
+                            {{students_rows}}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+    
+    <script>
+        // Search functionality
+        document.getElementById('searchInput').addEventListener('keyup', function() {
+            const searchValue = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#studentsTableBody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(searchValue) ? '' : 'none';
+            });
+        });
+    </script>
+</body>
+</html>

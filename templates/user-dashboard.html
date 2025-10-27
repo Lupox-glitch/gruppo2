@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Studente - Sistema Gestione CV</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="dashboard">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>CV Manager</h2>
+                <span class="badge badge-user">Studente</span>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="/user-dashboard" class="nav-item active">
+                    <span>📊</span> Dashboard
+                </a>
+                <a href="/logout" class="nav-item">
+                    <span>🚪</span> Logout
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <p>Benvenuto, {{user_nome}} {{user_cognome}}</p>
+            </div>
+        </aside>
+        
+        <main class="main-content">
+            <header class="content-header">
+                <h1>Dashboard Studente</h1>
+                <p>Gestisci il tuo curriculum vitae e le tue esperienze</p>
+            </header>
+            
+            {{success_message}}
+            {{error_message}}
+            
+            <!-- Informazioni Personali -->
+            <section class="dashboard-section">
+                <div class="section-header">
+                    <h2>Informazioni Personali</h2>
+                    <button class="btn-secondary" onclick="toggleEditMode()">Modifica</button>
+                </div>
+                
+                <div class="card">
+                    <form method="POST" action="/api/update-profile" id="profileForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="nome">Nome:</label>
+                                <input type="text" id="nome" name="nome" value="{{user_nome}}" readonly>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="cognome">Cognome:</label>
+                                <input type="text" id="cognome" name="cognome" value="{{user_cognome}}" readonly>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="data_nascita">Data di Nascita:</label>
+                                <input type="date" id="data_nascita" name="data_nascita" value="{{data_nascita}}" readonly>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="telefono">Telefono:</label>
+                                <input type="tel" id="telefono" name="telefono" value="{{telefono}}" readonly>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="indirizzo">Indirizzo:</label>
+                            <input type="text" id="indirizzo" name="indirizzo" value="{{indirizzo}}" readonly>
+                        </div>
+                        
+                        <button type="submit" class="btn-primary" id="saveProfileBtn" style="display: none;">
+                            Salva Modifiche
+                        </button>
+                    </form>
+                </div>
+            </section>
+            
+            <!-- CV Upload -->
+            <section class="dashboard-section">
+                <div class="section-header">
+                    <h2>Curriculum Vitae</h2>
+                </div>
+                
+                <div class="card">
+                    {{cv_section}}
+                    
+                    <form method="POST" action="/api/upload-cv" enctype="multipart/form-data" id="cvForm">
+                        <div class="form-group">
+                            <label for="cv_file">Carica nuovo CV (PDF, max 5MB):</label>
+                            <input type="file" id="cv_file" name="cv_file" accept=".pdf" required>
+                        </div>
+                        <button type="submit" class="btn-primary">Carica CV</button>
+                    </form>
+                </div>
+            </section>
+            
+            <!-- Esperienze Lavorative -->
+            <section class="dashboard-section">
+                <div class="section-header">
+                    <h2>Esperienze Lavorative</h2>
+                    <button class="btn-primary" onclick="showAddExperienceForm('lavorativa')">+ Aggiungi</button>
+                </div>
+                
+                <div class="experiences-grid">
+                    {{esperienze_lavorative}}
+                </div>
+            </section>
+            
+            <!-- Esperienze Formative -->
+            <section class="dashboard-section">
+                <div class="section-header">
+                    <h2>Esperienze Formative</h2>
+                    <button class="btn-primary" onclick="showAddExperienceForm('formativa')">+ Aggiungi</button>
+                </div>
+                
+                <div class="experiences-grid">
+                    {{esperienze_formative}}
+                </div>
+            </section>
+            
+            <!-- Form Aggiungi Esperienza (nascosto) -->
+            <div id="addExperienceModal" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>Aggiungi Esperienza</h3>
+                        <button class="close-btn" onclick="hideAddExperienceForm()">×</button>
+                    </div>
+                    
+                    <form method="POST" action="/api/add-experience" id="addExperienceForm">
+                        <input type="hidden" id="exp_tipo" name="tipo" value="">
+                        
+                        <div class="form-group">
+                            <label for="titolo">Titolo:</label>
+                            <input type="text" id="titolo" name="titolo" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="azienda">Azienda/Istituzione:</label>
+                            <input type="text" id="azienda" name="azienda" required>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="data_inizio">Data Inizio:</label>
+                                <input type="date" id="data_inizio" name="data_inizio" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="data_fine">Data Fine:</label>
+                                <input type="date" id="data_fine" name="data_fine">
+                                <small>Lascia vuoto se in corso</small>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="descrizione">Descrizione:</label>
+                            <textarea id="descrizione" name="descrizione" rows="4" required></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn-primary">Salva Esperienza</button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        function toggleEditMode() {
+            const inputs = document.querySelectorAll('#profileForm input');
+            const saveBtn = document.getElementById('saveProfileBtn');
+            
+            inputs.forEach(input => {
+                input.readOnly = !input.readOnly;
+            });
+            
+            saveBtn.style.display = saveBtn.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        function showAddExperienceForm(tipo) {
+            document.getElementById('exp_tipo').value = tipo;
+            document.getElementById('addExperienceModal').style.display = 'flex';
+        }
+        
+        function hideAddExperienceForm() {
+            document.getElementById('addExperienceModal').style.display = 'none';
+        }
+        
+        function deleteExperience(id) {
+            if (confirm('Sei sicuro di voler eliminare questa esperienza?')) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/api/delete-experience';
+                
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'id';
+                input.value = id;
+                
+                form.appendChild(input);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+    </script>
+    <script src="/js/validation.js"></script>
+</body>
+</html>
