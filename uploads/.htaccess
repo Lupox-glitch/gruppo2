@@ -1,0 +1,14 @@
+# Protect uploaded files - only allow access through PHP scripts
+# This prevents direct access to uploaded CV files
+
+# Deny all direct access
+<Files *>
+    Order Deny,Allow
+    Deny from all
+</Files>
+
+# Only allow PDF files to be accessed through PHP
+<FilesMatch "\.(pdf)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
