@@ -287,7 +287,22 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
         )
         
         # Route handling
-        if path == '/api/login':
+        # Form-based login (HTML)
+        if path == '/login':
+            result = handle_login(post_data)
+            if result['success']:
+                self._create_session(result['user'])
+                # Redirect to appropriate dashboard
+                self._redirect(result['redirect'])
+            else:
+                # Re-render login page with error message
+                self._render_template('templates/login.html', {
+                    'error': result.get('error', ''),
+                    'success': ''
+                })
+
+        # JSON API login
+        elif path == '/api/login':
             result = handle_login(post_data)
             if result['success']:
                 self._create_session(result['user'])
@@ -295,6 +310,21 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
             else:
                 self._send_json({'success': False, 'error': result['error']}, 400)
         
+        # Form-based register (HTML)
+        elif path == '/register':
+            result = handle_register(post_data)
+            if result['success']:
+                # After registration, show login with success message
+                self._render_template('templates/login.html', {
+                    'error': '',
+                    'success': result.get('message', 'Registrazione completata!')
+                })
+            else:
+                self._render_template('templates/register.html', {
+                    'error': result.get('error', '')
+                })
+
+        # JSON API register
         elif path == '/api/register':
             result = handle_register(post_data)
             if result['success']:
@@ -324,6 +354,20 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
                 return
             
             result = handle_add_experience(session.get('user_id'), post_data)
+            self._send_json(result)
+
+        elif path == '/api/delete-experience':
+            if not session.get('user_id'):
+                self._send_json({'success': False, 'error': 'Non autenticato'}, 401)
+                return
+            exp_id = post_data.get('id') or post_data.get('experience_id')
+            try:
+                exp_id = int(exp_id)
+            except (TypeError, ValueError):
+                self._send_json({'success': False, 'error': 'ID esperienza non valido'}, 400)
+                return
+
+            result = handle_delete_experience(session.get('user_id'), exp_id)
             self._send_json(result)
         
         else:
