@@ -310,11 +310,66 @@ def get_user_dashboard_data(user_id):
         if isinstance(user[key], str):
             user[key] = sanitize_input(user[key])
     
-    return {
-        'user': user,
-        'cv_data': cv_data,
-        'experiences': experiences
+    # Flatten data for template
+    context = {
+        'user_nome': user.get('nome', ''),
+        'user_cognome': user.get('cognome', ''),
+        'user_email': user.get('email', ''),
+        'telefono': cv_data.get('telefono', ''),
+        'data_nascita': cv_data.get('data_nascita', ''),
+        'citta': cv_data.get('citta', ''),
+        'indirizzo': cv_data.get('indirizzo', ''),
+        'linkedin_url': cv_data.get('linkedin_url', ''),
+        'success_message': '',
+        'error_message': '',
+        'cv_section': _render_cv_section(cv_data),
+        'esperienze_lavorative': _render_experiences(experiences, 'lavoro'),
+        'esperienze_formative': _render_experiences(experiences, 'formazione')
     }
+    
+    return context
+
+
+def _render_cv_section(cv_data):
+    """Render CV section HTML"""
+    cv_path = cv_data.get('cv_file_path', '')
+    if cv_path:
+        return f'''
+        <div class="alert alert-success">
+            <strong>✓ CV caricato:</strong> {cv_path.split('/')[-1]}
+            <br>
+            <a href="/{cv_path}" class="btn btn-secondary btn-sm" target="_blank">Visualizza CV</a>
+        </div>
+        '''
+    else:
+        return '<p class="text-muted">Nessun CV caricato ancora.</p>'
+
+
+def _render_experiences(experiences, tipo):
+    """Render experiences list HTML"""
+    filtered = [exp for exp in experiences if exp.get('tipo') == tipo]
+    
+    if not filtered:
+        return '<p class="text-muted">Nessuna esperienza aggiunta ancora.</p>'
+    
+    html = '<div class="experiences-list">'
+    for exp in filtered:
+        is_current = exp.get('is_current', 0)
+        data_fine = exp.get('data_fine', '')
+        periodo = f"{exp.get('data_inizio', '')} - {'In corso' if is_current else data_fine}"
+        
+        html += f'''
+        <div class="experience-card">
+            <h4>{sanitize_input(exp.get('titolo', ''))}</h4>
+            <p class="company">{sanitize_input(exp.get('azienda_istituto', ''))}</p>
+            <p class="period">{periodo}</p>
+            <p class="description">{sanitize_input(exp.get('descrizione', ''))}</p>
+            <button onclick="deleteExperience({exp.get('id')})" class="btn btn-danger btn-sm">Elimina</button>
+        </div>
+        '''
+    
+    html += '</div>'
+    return html
 
 
 def get_admin_dashboard_data():
@@ -324,7 +379,7 @@ def get_admin_dashboard_data():
     
     # Get all students with their data
     cursor.execute('''
-        SELECT u.*, cv.cv_file_path, cv.cv_uploaded_at, cv.telefono,
+        SELECT u.*, cv.cv_file_path, cv.cv_uploaded_at, cv.telefono, cv.data_nascita,
                COUNT(e.id) as total_experiences
         FROM users u
         LEFT JOIN cv_data cv ON u.id = cv.user_id
@@ -342,17 +397,48 @@ def get_admin_dashboard_data():
     cursor.execute("SELECT COUNT(DISTINCT user_id) as total FROM cv_data WHERE cv_file_path IS NOT NULL")
     students_with_cv = cursor.fetchone()['total']
     
-    cursor.execute("SELECT COUNT(*) as total FROM experiences")
-    total_experiences = cursor.fetchone()['total']
+    cursor.execute("SELECT COUNT(*) as total FROM experiences WHERE tipo = 'lavoro'")
+    total_work_exp = cursor.fetchone()['total']
+    
+    cursor.execute("SELECT COUNT(*) as total FROM experiences WHERE tipo = 'formazione'")
+    total_edu_exp = cursor.fetchone()['total']
     
     conn.close()
     
+    # Render student rows
+    students_rows_html = _render_students_table(students)
+    
     return {
-        'students': students,
-        'stats': {
-            'total_students': total_students,
-            'students_with_cv': students_with_cv,
-            'total_experiences': total_experiences,
-            'incomplete_profiles': total_students - students_with_cv
-        }
+        'user_nome': 'Admin',
+        'user_cognome': 'Sistema',
+        'total_students': total_students,
+        'total_cvs': students_with_cv,
+        'total_work_exp': total_work_exp,
+        'total_edu_exp': total_edu_exp,
+        'students_rows': students_rows_html
     }
+
+
+def _render_students_table(students):
+    """Render students table rows HTML"""
+    if not students:
+        return '<tr><td colspan="7" class="text-center">Nessuno studente registrato</td></tr>'
+    
+    html = ''
+    for student in students:
+        cv_status = '✓' if student.get('cv_file_path') else '✗'
+        html += f'''
+        <tr>
+            <td>{student.get('id')}</td>
+            <td>{sanitize_input(student.get('nome', ''))}</td>
+            <td>{sanitize_input(student.get('cognome', ''))}</td>
+            <td>{sanitize_input(student.get('email', ''))}</td>
+            <td>{student.get('data_nascita', 'N/A')}</td>
+            <td>{cv_status}</td>
+            <td>
+                <a href="/admin-view-student?id={student.get('id')}" class="btn btn-primary btn-sm">Visualizza</a>
+            </td>
+        </tr>
+        '''
+    
+    return html

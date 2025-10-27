@@ -826,3 +826,278 @@ tbody td {
         background: white;
     }
 }
+
+/* ============================================
+   Landing - Dark Theme
+   ============================================ */
+
+.landing-dark {
+    min-height: 100vh;
+    background: radial-gradient(1200px 600px at 20% 0%, #111827 0, #0b1220 35%, #050a14 100%);
+    color: var(--white);
+}
+
+/* Improve contrast of headings and buttons on dark backgrounds */
+.landing-dark h1,
+.landing-dark h2,
+.landing-dark h3,
+.landing-dark h4,
+.landing-dark h5,
+.landing-dark h6 { color: #f3f4f6; }
+
+.landing-dark .btn { color: #e5e7eb; }
+.landing-dark .btn-outline {
+    color: #dbeafe;
+    border-color: #60a5fa;
+}
+.landing-dark .btn-outline:hover:not(:disabled) {
+    background: rgba(96,165,250,.12);
+    border-color: #93c5fd;
+    color: #ffffff;
+}
+
+.landing-header-dark {
+    background: #0f172a;
+    color: var(--white);
+    padding: var(--spacing-md) var(--spacing-lg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: var(--shadow);
+}
+
+.landing-header-dark h1,
+.landing-header-dark h2 { color: var(--white); margin: 0; }
+.landing-header-dark nav a { color: #e5e7eb; margin-left: var(--spacing-sm); }
+.landing-header-dark nav a:hover { color: var(--white); }
+
+.dark-card {
+    background: #111827;
+    color: #e5e7eb;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    border: 1px solid #1f2937;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Trinity-style sweep effect on hover */
+.dark-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(37,99,235,.1), transparent);
+    transition: left 0.6s ease;
+}
+
+.dark-card:hover::before {
+    left: 100%;
+}
+
+.dark-hero {
+    background: linear-gradient(135deg, #0b1220, #111827);
+}
+
+.stat-card.dark-card {
+    background: #0f172a;
+    color: #e5e7eb;
+    border-left-color: var(--primary);
+}
+.stat-card.dark-card .stat-label { color: #9ca3af; }
+.stat-card.dark-card .stat-value { color: #f9fafb; }
+
+.text-on-dark-muted { color: #d1d5db; }
+
+/* ============================================
+   Landing - Enhancements & Animations
+   ============================================ */
+
+.hero-title {
+    font-size: clamp(2.25rem, 5vw, 3rem);
+    line-height: 1.1;
+    background: linear-gradient(90deg, var(--primary), #06b6d4, var(--secondary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.hover-lift {
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--spacing-md);
+}
+
+.section {
+    max-width: 1100px;
+    margin: var(--spacing-lg) auto;
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: var(--spacing-md);
+}
+
+.divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #334155, transparent);
+    margin: var(--spacing-lg) auto;
+}
+
+/* FAQ (details/summary) */
+.faq details {
+    background: #0f172a;
+    color: #e5e7eb;
+    border: 1px solid #1f2937;
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md) var(--spacing-lg);
+    transition: all 0.3s ease;
+}
+.faq details:hover {
+    border-color: var(--primary);
+    background: rgba(37,99,235,.05);
+}
+.faq details[open] {
+    border-color: var(--primary);
+    box-shadow: 0 4px 20px rgba(37,99,235,.2);
+}
+.faq details + details { margin-top: var(--spacing-sm); }
+.faq summary {
+    cursor: pointer;
+    list-style: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
+.faq summary:hover {
+    color: var(--primary);
+}
+.faq summary::-webkit-details-marker { display: none; }
+.faq p { 
+    margin-top: var(--spacing-sm); 
+    color: #cbd5e1;
+    animation: fadeIn 0.4s ease-out;
+}
+
+/* Logo chips (optional placeholders) */
+.logo-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #1f2937;
+    border-radius: 9999px;
+    background: #0f172a;
+    color: #d1d5db;
+    font-size: 0.875rem;
+    margin: 0.25rem;
+}
+
+/* ============================================
+     Inspired Header & Mobile Nav (Glass/Sticky)
+     ============================================ */
+
+.container { max-width: 1160px; margin: 0 auto; padding: 0 20px; }
+
+.site-header {
+        position: sticky; top: 0; z-index: 50;
+        background: rgba(11, 17, 32, 0.55);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid #1f2937;
+}
+.header-inner { display:flex; align-items:center; justify-content:space-between; height: 72px; }
+.brand { display:flex; align-items:center; gap:.6rem; color:#e5e7eb; font-weight:800; text-decoration:none; }
+.brand svg { filter: drop-shadow(0 4px 10px rgba(37,99,235,.35)); }
+.nav { display:flex; gap: 1.1rem; }
+.nav a { color:#cfd3ff; text-decoration:none; font-weight:600; position:relative; transition:color .2s ease; }
+.nav a::after { content:''; position:absolute; bottom:-6px; left:0; width:0; height:2px; background:linear-gradient(90deg, var(--primary), #06B6D4); transition:width .25s ease; }
+.nav a:hover { color:#e5e7eb; }
+.nav a:hover::after { width:100%; }
+.actions { display:flex; gap:.6rem; align-items:center; }
+.burger { display:none; background:none; border:0; padding:8px; }
+.burger span { display:block; width:24px; height:2px; background:#e5e7eb; margin:5px 0; border-radius:2px; }
+
+@media (max-width: 880px){
+    .nav,.actions{ display:none }
+    .burger{ display:block }
+}
+
+.mobile-menu[hidden]{ display:none }
+.mobile-menu{ 
+    border-bottom:1px solid #1f2937; 
+    background:rgba(11,17,32,.9); 
+    backdrop-filter: blur(8px);
+    animation: slideDown 0.3s ease-out;
+}
+.mobile-menu nav{ display:flex; flex-direction:column; gap:10px; padding:14px 20px; }
+.mobile-menu a{ color:#e5e7eb; text-decoration:none; font-weight:600; }
+.mobile-menu .btn{ width:100%; margin-top:8px; }
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================
+   Animations (Trinity-inspired)
+   ============================================ */
+
+@keyframes fadeInUp{
+  from{opacity:0;transform:translateY(30px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+@keyframes fadeInRight{
+  from{opacity:0;transform:translateX(50px)}
+  to{opacity:1;transform:translateX(0)}
+}
+
+@keyframes fadeIn{
+  from{opacity:0}
+  to{opacity:1}
+}
+
+@keyframes shimmer{
+  0%{background-position:0% center}
+  100%{background-position:200% center}
+}
+
+/* Trinity-style gradient text */
+.gradient {
+    background: linear-gradient(90deg, var(--primary), #06b6d4);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: shimmer 3s infinite linear;
+    background-size: 200% auto;
+}
+
+/* Hero animations with staggered delays */
+.hero-animate-1 { 
+    animation: fadeInUp 0.8s ease-out;
+}
+.hero-animate-2 { animation: fadeInUp 1s ease-out 0.2s both; }
+.hero-animate-3 { animation: fadeInUp 1.2s ease-out 0.4s both; }
+.hero-animate-4 { animation: fadeInUp 1.4s ease-out 0.6s both; }
+
+.hero-right { animation: fadeInRight 1s ease-out 0.5s both; }
+
+/* Badge hover effects (Trinity style) */
+.badge-hover {
+  transition: all 0.3s ease;
+}
+.badge-hover:hover {
+  transform: translateY(-2px);
+  border-color: var(--primary);
+  color: #e5e7eb;
+  box-shadow: 0 4px 12px rgba(37,99,235,.3);
+}

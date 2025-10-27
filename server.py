@@ -54,7 +54,7 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
         return {}
     
     def _create_session(self, user_data):
-        """Create new session"""
+        """Create new session and return cookie string"""
         session_id = secrets.token_urlsafe(32)
         expires = (datetime.now() + timedelta(hours=24)).timestamp()
         SESSIONS[session_id] = {
@@ -62,33 +62,34 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
             'expires': expires
         }
         
-        # Set cookie
+        # Return cookie string (don't send header yet)
         cookie = http.cookies.SimpleCookie()
         cookie['session_id'] = session_id
         cookie['session_id']['path'] = '/'
         cookie['session_id']['httponly'] = True
         cookie['session_id']['max-age'] = 86400  # 24 hours
-        self.send_header('Set-Cookie', cookie['session_id'].OutputString())
-        return session_id
+        return cookie['session_id'].OutputString()
     
     def _destroy_session(self):
-        """Destroy current session"""
+        """Destroy current session and return cookie string"""
         cookies = http.cookies.SimpleCookie(self.headers.get('Cookie'))
         session_id = cookies.get('session_id')
         if session_id and session_id.value in SESSIONS:
             del SESSIONS[session_id.value]
         
-        # Clear cookie
+        # Return cookie clearing string
         cookie = http.cookies.SimpleCookie()
         cookie['session_id'] = ''
         cookie['session_id']['path'] = '/'
         cookie['session_id']['expires'] = 'Thu, 01 Jan 1970 00:00:00 GMT'
-        self.send_header('Set-Cookie', cookie['session_id'].OutputString())
+        return cookie['session_id'].OutputString()
     
-    def _redirect(self, location):
+    def _redirect(self, location, set_cookie=None):
         """Redirect to another page"""
         self.send_response(302)
         self.send_header('Location', location)
+        if set_cookie:
+            self.send_header('Set-Cookie', set_cookie)
         self.end_headers()
     
     def _render_template(self, template_path, context=None):
@@ -218,15 +219,42 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
         session = self._get_session()
         
         # Route handling
-        if path == '/' or path == '/index':
-            # Check if already logged in
+        if path in ['/', '/home', '/index']:
+            # Always show homepage, even if logged in
             if session.get('user_id'):
+                # Welcome for logged-in users
+                welcome_section = f"""
+<h1>Benvenuto, {session.get('nome','')} {session.get('cognome','')}</h1>
+<p>Accedi rapidamente alla tua area.</p>
+"""
                 if session.get('role') == 'admin':
-                    self._redirect('/admin-dashboard')
+                    cta_section = """
+<a href="/admin-dashboard" class="btn btn-primary">Vai alla Dashboard Admin</a>
+<a href="/logout" class="btn btn-secondary">Logout</a>
+"""
                 else:
-                    self._redirect('/user-dashboard')
-                return
-            
+                    cta_section = """
+<a href="/user-dashboard" class="btn btn-primary">Vai alla tua Dashboard</a>
+<a href="/logout" class="btn btn-secondary">Logout</a>
+"""
+            else:
+                # Generic homepage for guests
+                welcome_section = """
+<h1>Sistema Gestione CV</h1>
+<p>Gestisci facilmente il tuo curriculum e le tue esperienze.</p>
+"""
+                cta_section = """
+<a href="/login" class="btn btn-primary">Accedi</a>
+<a href="/register" class="btn btn-secondary">Registrati</a>
+"""
+
+            self._render_template('templates/home.html', {
+                'welcome_section': welcome_section,
+                'cta_section': cta_section
+            })
+
+        elif path == '/login':
+            # Show login page regardless of session state (optionally could redirect if logged in)
             self._render_template('templates/login.html', {
                 'error': session.get('error', ''),
                 'success': session.get('success', '')
@@ -256,11 +284,14 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
             
             from handlers import get_admin_dashboard_data
             data = get_admin_dashboard_data()
+            # Add admin session info to context
+            data['user_nome'] = session.get('nome', 'Admin')
+            data['user_cognome'] = session.get('cognome', 'Sistema')
             self._render_template('templates/admin-dashboard.html', data)
         
         elif path == '/logout':
-            self._destroy_session()
-            self._redirect('/')
+            cookie = self._destroy_session()
+            self._redirect('/', set_cookie=cookie)
         
         # Static files
         elif path.startswith('/css/') or path.startswith('/js/') or path.startswith('/uploads/'):
@@ -291,9 +322,9 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
         if path == '/login':
             result = handle_login(post_data)
             if result['success']:
-                self._create_session(result['user'])
+                cookie = self._create_session(result['user'])
                 # Redirect to appropriate dashboard
-                self._redirect(result['redirect'])
+                self._redirect(result['redirect'], set_cookie=cookie)
             else:
                 # Re-render login page with error message
                 self._render_template('templates/login.html', {
@@ -305,8 +336,12 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
         elif path == '/api/login':
             result = handle_login(post_data)
             if result['success']:
-                self._create_session(result['user'])
-                self._send_json({'success': True, 'redirect': result['redirect']})
+                cookie = self._create_session(result['user'])
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.send_header('Set-Cookie', cookie)
+                self.end_headers()
+                self.wfile.write(json.dumps({'success': True, 'redirect': result['redirect']}).encode('utf-8'))
             else:
                 self._send_json({'success': False, 'error': result['error']}, 400)
         

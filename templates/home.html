@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - Sistema Gestione CV</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="landing-dark">
+    <!-- Sticky Glass Header -->
+    <header class="site-header">
+        <div class="container header-inner">
+            <a class="brand" href="/">
+                <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+                    <defs>
+                        <linearGradient id="g-home" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0%" stop-color="#2563eb"/>
+                            <stop offset="100%" stop-color="#06B6D4"/>
+                        </linearGradient>
+                    </defs>
+                    <circle cx="12" cy="12" r="10" fill="url(#g-home)"></circle>
+                </svg>
+                <span>CV Manager</span>
+            </a>
+            <nav class="nav">
+                <a href="#features">Funzionalità</a>
+                <a href="#faq">FAQ</a>
+                <a href="/user-dashboard">Dashboard</a>
+            </nav>
+            <div class="actions">
+                <a class="btn btn-outline" href="/login">Accedi</a>
+                <a class="btn btn-primary" href="/register">Registrati</a>
+            </div>
+            <button class="burger" aria-label="Apri menu" aria-expanded="false" id="burger">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu" hidden>
+        <nav>
+            <a href="#features">Funzionalità</a>
+            <a href="#faq">FAQ</a>
+            <a href="/user-dashboard">Dashboard</a>
+            <a class="btn btn-primary" href="/login">Accedi</a>
+            <a class="btn btn-secondary" href="/register">Registrati</a>
+        </nav>
+    </div>
+
+    <!-- Hero Section (Dark) -->
+    <section class="card dark-card dark-hero section" style="text-align:center;">
+        <div style="max-width:820px;margin:0 auto;">
+            <h1 class="hero-animate-1" style="font-size:clamp(32px,4.2vw,54px);line-height:1.05;margin:0 0 14px;font-weight:800;font-family:'Space Grotesk',Inter,-apple-system;">La tua <span class="gradient">carriera</span>, in ordine.</h1>
+            <div class="hero-animate-2">
+                {{welcome_section}}
+                <p class="text-on-dark-muted mb-3">Carica il tuo CV, gestisci i tuoi dati e tieni traccia delle tue esperienze in un unico posto.</p>
+            </div>
+            <div class="flex flex-center gap-2 hero-animate-3">
+                {{cta_section}}
+                <a class="btn btn-outline" href="#features">Scopri le funzionalità</a>
+            </div>
+            <div class="badges mt-2 hero-animate-4" style="display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;">
+                <span class="logo-chip badge-hover">Sicuro</span>
+                <span class="logo-chip badge-hover">Senza dipendenze</span>
+                <span class="logo-chip badge-hover">Responsive</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Actions (Dark) -->
+    <section class="section">
+        <div class="quick-actions">
+            <a href="/login" class="card dark-card hover-lift btn btn-block" style="text-align:left;">
+                <h3>🚀 Inizia Subito</h3>
+                <p class="text-on-dark-muted">Accedi o registrati in pochi secondi.</p>
+            </a>
+            <a href="/user-dashboard" class="card dark-card hover-lift btn btn-block" style="text-align:left;">
+                <h3>📤 Carica CV</h3>
+                <p class="text-on-dark-muted">Carica il tuo curriculum in formato PDF.</p>
+            </a>
+            <a href="/user-dashboard" class="card dark-card hover-lift btn btn-block" style="text-align:left;">
+                <h3>💼 Aggiungi Esperienza</h3>
+                <p class="text-on-dark-muted">Registra esperienze lavorative o formative.</p>
+            </a>
+        </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- Features (Dark Cards) -->
+    <section id="features" class="section grid grid-3">
+        <div class="card dark-card hover-lift">
+            <h3>📄 CV in PDF</h3>
+            <p class="text-on-dark-muted">Carica e conserva il tuo curriculum in formato PDF con controlli di sicurezza e dimensione.</p>
+        </div>
+        <div class="card dark-card hover-lift">
+            <h3>👤 Profilo Completo</h3>
+            <p class="text-on-dark-muted">Aggiorna facilmente dati anagrafici, contatti, indirizzo e link a LinkedIn.</p>
+        </div>
+        <div class="card dark-card hover-lift">
+            <h3>💼 Esperienze</h3>
+            <p class="text-on-dark-muted">Aggiungi esperienze lavorative e formative con periodi e descrizioni.</p>
+        </div>
+    </section>
+
+    <!-- Stats / Selling Points (Dark) -->
+    <section class="section stats-grid">
+        <div class="stat-card dark-card">
+            <div class="stat-label">Sicurezza</div>
+            <div class="stat-value">✓</div>
+            <p class="text-on-dark-muted mt-1">Password hashate, query parametrizzate e protezione XSS.</p>
+        </div>
+        <div class="stat-card dark-card">
+            <div class="stat-label">Semplicità</div>
+            <div class="stat-value">0</div>
+            <p class="text-on-dark-muted mt-1">Dipendenze esterne: solo Python standard library.</p>
+        </div>
+        <div class="stat-card dark-card">
+            <div class="stat-label">Velocità</div>
+            <div class="stat-value">⚡</div>
+            <p class="text-on-dark-muted mt-1">Interfaccia moderna e reattiva su ogni dispositivo.</p>
+        </div>
+        <div class="stat-card dark-card">
+            <div class="stat-label">Affidabilità</div>
+            <div class="stat-value">24/7</div>
+            <p class="text-on-dark-muted mt-1">Dati conservati in SQLite con integrità garantita.</p>
+        </div>
+    </section>
+
+    <!-- How it works (Dark) -->
+    <section class="section">
+        <div class="section-header">
+            <h2>Come funziona</h2>
+            <p class="text-on-dark-muted">Tre semplici passaggi per iniziare</p>
+        </div>
+        <div class="grid grid-3">
+            <div class="card dark-card hover-lift">
+                <h3>1. Crea l'account</h3>
+                <p class="text-on-dark-muted">Registrati con email e password sicura in meno di un minuto.</p>
+            </div>
+            <div class="card dark-card hover-lift">
+                <h3>2. Compila il profilo</h3>
+                <p class="text-on-dark-muted">Inserisci i tuoi dati anagrafici e collegamenti utili (es. LinkedIn).</p>
+            </div>
+            <div class="card dark-card hover-lift">
+                <h3>3. Carica il tuo CV</h3>
+                <p class="text-on-dark-muted">Carica un PDF aggiornato e aggiungi esperienze per tenerlo organizzato.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section faq">
+        <div class="section-header">
+            <h2>Domande frequenti</h2>
+            <p class="text-on-dark-muted">Tutto quello che ti serve sapere</p>
+        </div>
+        <details>
+            <summary>Che tipo di file posso caricare?</summary>
+            <p>Al momento supportiamo solo PDF fino a 5MB per garantire sicurezza e compatibilità.</p>
+        </details>
+        <details>
+            <summary>Come proteggete i miei dati?</summary>
+            <p>Usiamo hash sicuri per le password, query parametrizzate e sanificazione degli input.</p>
+        </details>
+        <details>
+            <summary>Posso aggiornare o eliminare le esperienze?</summary>
+            <p>Sì, puoi aggiungere ed eliminare esperienze direttamente dalla tua dashboard.</p>
+        </details>
+    </section>
+
+    <!-- CTA Strip (Dark) -->
+    <section class="card dark-card section" style="text-align:center;">
+        <h3>Pronto a iniziare?</h3>
+        <p class="text-on-dark-muted">Accedi o crea un account in pochi secondi.</p>
+        <div class="flex flex-center gap-2 mt-2">
+            <a class="btn btn-primary" href="/login">Accedi</a>
+            <a class="btn btn-secondary" href="/register">Registrati</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="text-center mb-4 mt-4">
+        <p class="text-on-dark-muted">&copy; 2025 CV Manager — Progetto didattico</p>
+    </footer>
+
+    <script>
+    (function(){
+        var burger = document.getElementById('burger');
+        var menu = document.getElementById('mobileMenu');
+        if(burger && menu){
+            burger.addEventListener('click', function(){
+                var open = burger.getAttribute('aria-expanded') === 'true';
+                burger.setAttribute('aria-expanded', String(!open));
+                if(open){ menu.setAttribute('hidden',''); }
+                else { menu.removeAttribute('hidden'); }
+            });
+        }
+    })();
+    </script>
+</body>
+</html>
