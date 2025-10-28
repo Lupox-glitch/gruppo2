@@ -8,11 +8,14 @@ CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
+    salt VARCHAR(255) NOT NULL,
     nome VARCHAR(100) NOT NULL,
     cognome VARCHAR(100) NOT NULL,
+--  nazionalita' la metto come dato del cv non dell'utente 
+--  data_nascita che troviamo nei dati del cv inutile ripeterla 
     role ENUM('student', 'admin') DEFAULT 'student',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+--    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_email (email),
     INDEX idx_role (role)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -23,13 +26,15 @@ CREATE TABLE IF NOT EXISTS cv_data (
     user_id INT NOT NULL,
     telefono VARCHAR(20),
     indirizzo VARCHAR(255),
+--  email gia' presente nell'utente 
     data_nascita DATE,
     citta VARCHAR(100),
+    nazionalita VARCHAR(100),
     linkedin_url VARCHAR(255),
     cv_file_path VARCHAR(255),
-    cv_uploaded_at TIMESTAMP NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+--  cv_uploaded_at TIMESTAMP NULL,
+--  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+--  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     INDEX idx_user_id (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -51,6 +56,8 @@ CREATE TABLE IF NOT EXISTS experiences (
     INDEX idx_user_id (user_id),
     INDEX idx_tipo (tipo)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
 
 -- Insert default admin user
 -- Password: admin123 (CHANGE THIS IN PRODUCTION!)

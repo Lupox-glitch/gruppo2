@@ -8,7 +8,7 @@ import secrets
 from pathlib import Path
 from datetime import datetime
 from database import (
-    get_db_connection, hash_password, verify_password,
+    get_db_connection, hash_password, salt_generation,verify_password,
     sanitize_input, validate_email, validate_password,
     execute_query, execute_insert, execute_update
 )
@@ -37,7 +37,7 @@ def handle_login(data):
     user = cursor.fetchone()
     conn.close()
     
-    if not user or not verify_password(password, user['password_hash']):
+    if not user or not verify_password(password, user['password_hash'],user['salt']):
         return {'success': False, 'error': 'Email o password non corretti'}
     
     # Successful login
@@ -90,10 +90,11 @@ def handle_register(data):
         return {'success': False, 'error': 'Questa email è già registrata'}
     
     # Insert new user (prepared statement)
-    password_hash = hash_password(password)
+    salt=salt_generation()
+    password_hash = hash_password(password,salt)
     cursor.execute(
-        'INSERT INTO users (email, password_hash, nome, cognome, role) VALUES (%s, %s, %s, %s, "student")',
-        (email, password_hash, nome, cognome)
+        'INSERT INTO users (email, password_hash, salt, nome, cognome, role) VALUES (%s, %s, %s, %s, %s, "student")',
+        (email, password_hash, salt,nome, cognome)
     )
     
     user_id = cursor.lastrowid

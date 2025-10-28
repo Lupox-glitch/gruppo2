@@ -19,8 +19,8 @@ import mysql.connector
 # MySQL configuration from environment
 MYSQL_HOST = os.getenv('MYSQL_HOST', 'localhost')
 MYSQL_PORT = int(os.getenv('MYSQL_PORT', '3306'))
-MYSQL_USER = os.getenv('MYSQL_USER', 'root')
-MYSQL_PASSWORD = os.getenv('MYSQL_PASSWORD', '')
+MYSQL_USER = os.getenv('MYSQL_USER', 'root')                    # dipende da come lo setti nel sistema  
+MYSQL_PASSWORD = os.getenv('MYSQL_PASSWORD', 'PasswordRoot12!') # dipende da come lo setti nel sistema 
 MYSQL_DB = os.getenv('MYSQL_DB', 'cv_management')
 
 
@@ -36,17 +36,19 @@ def get_db_connection():
     )
     return conn
 
+def salt_generation(length=16):    # genera salt randomico 
+    return os.urandom(length)
 
-def hash_password(password):
+
+def hash_password(password,salt):
     """Hash password using SHA-256 (in production, use bcrypt)"""
     # Simple hash for demo - in production use bcrypt or argon2
-    salt = "cv_management_salt_2025"
     return hashlib.sha256((password + salt).encode()).hexdigest()
 
 
-def verify_password(password, hashed):
+def verify_password(password, hashed , salt):
     """Verify password against hash"""
-    return hash_password(password) == hashed
+    return hash_password(password,salt) == hashed
 
 
 def create_tables():
@@ -64,11 +66,12 @@ def create_tables():
             id INT AUTO_INCREMENT PRIMARY KEY,
             email VARCHAR(255) NOT NULL UNIQUE,
             password_hash VARCHAR(255) NOT NULL,
+            salt VARCHAR(255) NOT NULL,
             nome VARCHAR(100) NOT NULL,
             cognome VARCHAR(100) NOT NULL,
             role ENUM('student','admin') DEFAULT 'student',
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            -- created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            -- updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             INDEX idx_email (email),
             INDEX idx_role (role)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
@@ -85,11 +88,12 @@ def create_tables():
             indirizzo VARCHAR(255),
             data_nascita DATE,
             citta VARCHAR(100),
+            nazionalita VARCHAR(100),
             linkedin_url VARCHAR(255),
             cv_file_path VARCHAR(255),
-            cv_uploaded_at TIMESTAMP NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        --    cv_uploaded_at TIMESTAMP NULL,
+        --   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        --    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
             INDEX idx_user_id (user_id)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
@@ -134,15 +138,17 @@ def create_default_users():
         return  # Users already exist
     
     # Admin user
+    salt=salt_generation()
     cursor.execute(
         'INSERT INTO users (email, password_hash, nome, cognome, role) VALUES (%s, %s, %s, %s, %s)',
-        ('admin@cvmanagement.it', hash_password('admin123'), 'Admin', 'Sistema', 'admin')
+        ('admin@cvmanagement.it', hash_password('admin123',salt), salt, 'Admin', 'Sistema', 'admin')
     )
     
     # Student user
+    salt=salt_generation()
     cursor.execute(
         'INSERT INTO users (email, password_hash, nome, cognome, role) VALUES (%s, %s, %s, %s, %s)',
-        ('student@test.it', hash_password('student123'), 'Mario', 'Rossi', 'student')
+        ('student@test.it', hash_password('student123',salt), salt, 'Mario', 'Rossi', 'student')
     )
     
     student_id = cursor.lastrowid
@@ -211,7 +217,9 @@ def sanitize_input(text):
         '>': '&gt;',
         '"': '&quot;',
         "'": '&#x27;',
-        '/': '&#x2F;'
+        '/': '&#x2F;',
+        ';': '&#59;',
+        ':': '&#58;'
     }
     for old, new in replacements.items():
         text = text.replace(old, new)
