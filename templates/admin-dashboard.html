@@ -7,14 +7,17 @@
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <div class="dashboard">
+    <div class="dashboard-wrapper">
         <aside class="sidebar">
             <div class="sidebar-header">
                 <h2>CV Manager</h2>
-                <span class="badge badge-admin">Admin</span>
+                <span class="badge badge-primary">Admin</span>
             </div>
             
             <nav class="sidebar-nav">
+                <a href="/" class="nav-item">
+                    <span>🏠</span> Home
+                </a>
                 <a href="/admin-dashboard" class="nav-item active">
                     <span>📊</span> Dashboard
                 </a>
@@ -29,13 +32,13 @@
         </aside>
         
         <main class="main-content">
-            <header class="content-header">
+            <header class="dashboard-header">
                 <h1>Dashboard Amministratore</h1>
                 <p>Gestione completa degli studenti e dei curriculum</p>
             </header>
             
             <!-- Statistiche -->
-            <section class="stats-section">
+            <section class="section stats-grid">
                 <div class="stat-card">
                     <div class="stat-icon">👥</div>
                     <div class="stat-content">
@@ -73,26 +76,28 @@
             <section class="dashboard-section">
                 <div class="section-header">
                     <h2>Studenti Registrati</h2>
-                    <input type="text" id="searchInput" placeholder="Cerca studente..." class="search-input">
+                    <input type="text" id="searchInput" placeholder="Cerca studente..." class="form-control" style="max-width:280px;">
                 </div>
                 
                 <div class="card">
-                    <table class="students-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Nome</th>
-                                <th>Cognome</th>
-                                <th>Email</th>
-                                <th>Data Nascita</th>
-                                <th>CV</th>
-                                <th>Azioni</th>
-                            </tr>
-                        </thead>
-                        <tbody id="studentsTableBody">
-                            {{students_rows}}
-                        </tbody>
-                    </table>
+                    <div class="table-wrapper">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nome</th>
+                                    <th>Cognome</th>
+                                    <th>Email</th>
+                                    <th>Data Nascita</th>
+                                    <th>CV</th>
+                                    <th>Azioni</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentsTableBody">
+                                {{students_rows}}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </section>
         </main>

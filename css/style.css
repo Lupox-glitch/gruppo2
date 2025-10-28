@@ -845,6 +845,9 @@ tbody td {
 .landing-dark h5,
 .landing-dark h6 { color: #f3f4f6; }
 
+/* Make form labels on dark pages match heading color */
+.landing-dark .form-group label { color: #f3f4f6; }
+
 .landing-dark .btn { color: #e5e7eb; }
 .landing-dark .btn-outline {
     color: #dbeafe;

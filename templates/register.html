@@ -6,57 +6,94 @@
     <title>Registrazione - Sistema Gestione CV</title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
-<body>
-    <div class="login-container">
-        <div class="login-card">
-            <div class="login-header">
-                <h1>Registrazione</h1>
-                <p>Crea il tuo account</p>
+<body class="landing-dark">
+    <section class="section" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding-top:72px;padding-bottom:72px;">
+        <div class="card dark-card hover-lift" style="width:100%;max-width:520px;padding:28px;">
+            <div style="text-align:center;margin-bottom:16px;">
+                <a class="brand" href="/" style="display:inline-flex;align-items:center;gap:.5rem;color:inherit;text-decoration:none;margin-bottom:8px;">
+                    <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true">
+                        <defs>
+                            <linearGradient id="g-register" x1="0" y1="0" x2="1" y2="1">
+                                <stop offset="0%" stop-color="#2563eb"/>
+                                <stop offset="100%" stop-color="#06B6D4"/>
+                            </linearGradient>
+                        </defs>
+                        <circle cx="12" cy="12" r="10" fill="url(#g-register)"></circle>
+                    </svg>
+                    <strong>CV Manager</strong>
+                </a>
+                <h1 style="margin:0;font-size:22px;">Crea il tuo account</h1>
+                <p class="text-on-dark-muted" style="margin-top:6px;">Registrati per iniziare a gestire il tuo CV</p>
             </div>
-            
+
             {{error}}
-            
-            <form method="POST" action="/register" class="login-form" id="registerForm" data-validate="true">
-                <div class="form-group">
-                    <label for="nome">Nome:</label>
-                    <input type="text" id="nome" name="nome" required>
-                    <span class="error-message" id="nomeError"></span>
+
+            <form method="POST" action="/register" id="registerForm" data-validate="true" novalidate>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="nome">Nome</label>
+                        <input type="text" id="nome" name="nome" required placeholder="Mario" autocomplete="given-name">
+                        <span class="error-message" id="nomeError"></span>
+                    </div>
+                    <div class="form-group">
+                        <label for="cognome">Cognome</label>
+                        <input type="text" id="cognome" name="cognome" required placeholder="Rossi" autocomplete="family-name">
+                        <span class="error-message" id="cognomeError"></span>
+                    </div>
                 </div>
-                
+
                 <div class="form-group">
-                    <label for="cognome">Cognome:</label>
-                    <input type="text" id="cognome" name="cognome" required>
-                    <span class="error-message" id="cognomeError"></span>
-                </div>
-                
-                <div class="form-group">
-                    <label for="email">Email:</label>
-                    <input type="email" id="email" name="email" required>
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required placeholder="nome@esempio.com" autocomplete="email">
                     <span class="error-message" id="emailError"></span>
                 </div>
-                
-                <div class="form-group">
-                    <label for="password">Password:</label>
-                    <input type="password" id="password" name="password" required class="password-strength">
-                    <span class="error-message" id="passwordError"></span>
-                    <small>Minimo 8 caratteri, con maiuscole, minuscole e numeri</small>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <div style="display:flex;justify-content:space-between;align-items:center;">
+                            <label for="password" style="margin:0;">Password</label>
+                            <button type="button" id="togglePwReg" class="btn btn-outline" style="padding:4px 8px;font-size:12px;line-height:1;">Mostra</button>
+                        </div>
+                        <input type="password" id="password" name="password" required class="password-strength" placeholder="••••••••" autocomplete="new-password">
+                        <span class="error-message" id="passwordError"></span>
+                        <small class="text-on-dark-muted">Minimo 8 caratteri, con maiuscole, minuscole e numeri</small>
+                    </div>
+                    <div class="form-group">
+                        <div style="display:flex;justify-content:space-between;align-items:center;">
+                            <label for="password_confirm" style="margin:0;">Conferma Password</label>
+                            <button type="button" id="togglePwConfirm" class="btn btn-outline" style="padding:4px 8px;font-size:12px;line-height:1;">Mostra</button>
+                        </div>
+                        <input type="password" id="password_confirm" name="password_confirm" class="password-confirm" required placeholder="••••••••" autocomplete="new-password">
+                        <span class="error-message" id="confirmPasswordError"></span>
+                    </div>
                 </div>
-                
-                <div class="form-group">
-                    <label for="password_confirm">Conferma Password:</label>
-                    <input type="password" id="password_confirm" name="password_confirm" class="password-confirm" required>
-                    <span class="error-message" id="confirmPasswordError"></span>
-                </div>
-                
-                <button type="submit" class="btn-primary">Registrati</button>
+
+                <button type="submit" class="btn btn-primary" style="width:100%;">Registrati</button>
             </form>
-            
-            <div class="login-footer">
-                <p>Hai già un account? <a href="/">Accedi qui</a></p>
+
+            <div style="text-align:center;margin-top:12px;">
+                <p class="text-on-dark-muted" style="margin:0;">Hai già un account? <a href="/login">Accedi</a></p>
             </div>
         </div>
-    </div>
-    
+    </section>
+
     <script src="/js/validation.js"></script>
+    <script>
+    (function(){
+        function setupToggle(btnId, inputId){
+            var btn = document.getElementById(btnId);
+            var input = document.getElementById(inputId);
+            if(btn && input){
+                btn.addEventListener('click', function(){
+                    var type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+                    input.setAttribute('type', type);
+                    btn.textContent = type === 'password' ? 'Mostra' : 'Nascondi';
+                });
+            }
+        }
+        setupToggle('togglePwReg','password');
+        setupToggle('togglePwConfirm','password_confirm');
+    })();
+    </script>
 </body>
 </html>

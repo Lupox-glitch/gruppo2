@@ -7,14 +7,17 @@
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <div class="dashboard">
+    <div class="dashboard-wrapper">
         <aside class="sidebar">
             <div class="sidebar-header">
                 <h2>CV Manager</h2>
-                <span class="badge badge-admin">Admin</span>
+                <span class="badge badge-primary">Admin</span>
             </div>
             
             <nav class="sidebar-nav">
+                <a href="/" class="nav-item">
+                    <span>🏠</span> Home
+                </a>
                 <a href="/admin-dashboard" class="nav-item">
                     <span>📊</span> Dashboard
                 </a>
@@ -29,8 +32,8 @@
         </aside>
         
         <main class="main-content">
-            <header class="content-header">
-                <a href="/admin-dashboard" class="btn-secondary">← Torna alla Dashboard</a>
+            <header class="dashboard-header">
+                <a href="/admin-dashboard" class="btn btn-secondary">← Torna alla Dashboard</a>
                 <h1>Dettagli Studente</h1>
             </header>
             
@@ -41,7 +44,7 @@
                 </div>
                 
                 <div class="card">
-                    <div class="info-grid">
+                    <div class="grid grid-2">
                         <div class="info-item">
                             <label>Nome:</label>
                             <span>{{student_nome}}</span>
@@ -92,7 +95,7 @@
                     <h2>Esperienze Lavorative</h2>
                 </div>
                 
-                <div class="experiences-grid">
+                <div class="grid grid-2">
                     {{esperienze_lavorative}}
                 </div>
             </section>
@@ -103,7 +106,7 @@
                     <h2>Esperienze Formative</h2>
                 </div>
                 
-                <div class="experiences-grid">
+                <div class="grid grid-2">
                     {{esperienze_formative}}
                 </div>
             </section>

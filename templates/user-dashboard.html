@@ -7,14 +7,17 @@
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <div class="dashboard">
+    <div class="dashboard-wrapper">
         <aside class="sidebar">
             <div class="sidebar-header">
                 <h2>CV Manager</h2>
-                <span class="badge badge-user">Studente</span>
+                <span class="badge badge-primary">Studente</span>
             </div>
             
             <nav class="sidebar-nav">
+                <a href="/" class="nav-item">
+                    <span>🏠</span> Home
+                </a>
                 <a href="/user-dashboard" class="nav-item active">
                     <span>📊</span> Dashboard
                 </a>
@@ -29,7 +32,7 @@
         </aside>
         
         <main class="main-content">
-            <header class="content-header">
+            <header class="dashboard-header">
                 <h1>Dashboard Studente</h1>
                 <p>Gestisci il tuo curriculum vitae e le tue esperienze</p>
             </header>
@@ -41,7 +44,7 @@
             <section class="dashboard-section">
                 <div class="section-header">
                     <h2>Informazioni Personali</h2>
-                    <button class="btn-secondary" onclick="toggleEditMode()">Modifica</button>
+                    <button class="btn btn-secondary" onclick="toggleEditMode()">Modifica</button>
                 </div>
                 
                 <div class="card">
@@ -75,7 +78,7 @@
                             <input type="text" id="indirizzo" name="indirizzo" value="{{indirizzo}}" readonly>
                         </div>
                         
-                        <button type="submit" class="btn-primary" id="saveProfileBtn" style="display: none;">
+                        <button type="submit" class="btn btn-primary" id="saveProfileBtn" style="display: none;">
                             Salva Modifiche
                         </button>
                     </form>
@@ -96,7 +99,7 @@
                             <label for="cv_file">Carica nuovo CV (PDF, max 5MB):</label>
                             <input type="file" id="cv_file" name="cv_file" accept=".pdf" required>
                         </div>
-                        <button type="submit" class="btn-primary">Carica CV</button>
+                        <button type="submit" class="btn btn-primary">Carica CV</button>
                     </form>
                 </div>
             </section>
@@ -105,10 +108,10 @@
             <section class="dashboard-section">
                 <div class="section-header">
                     <h2>Esperienze Lavorative</h2>
-                    <button class="btn-primary" onclick="showAddExperienceForm('lavorativa')">+ Aggiungi</button>
+                    <button class="btn btn-primary" onclick="showAddExperienceForm('lavorativa')">+ Aggiungi</button>
                 </div>
                 
-                <div class="experiences-grid">
+                <div class="grid grid-2">
                     {{esperienze_lavorative}}
                 </div>
             </section>
@@ -117,17 +120,17 @@
             <section class="dashboard-section">
                 <div class="section-header">
                     <h2>Esperienze Formative</h2>
-                    <button class="btn-primary" onclick="showAddExperienceForm('formativa')">+ Aggiungi</button>
+                    <button class="btn btn-primary" onclick="showAddExperienceForm('formativa')">+ Aggiungi</button>
                 </div>
                 
-                <div class="experiences-grid">
+                <div class="grid grid-2">
                     {{esperienze_formative}}
                 </div>
             </section>
             
             <!-- Form Aggiungi Esperienza (nascosto) -->
-            <div id="addExperienceModal" class="modal" style="display: none;">
-                <div class="modal-content">
+            <div id="addExperienceModal" class="modal" style="display:none; position:fixed; inset:0; background: rgba(0,0,0,.5); align-items:center; justify-content:center; z-index:100;">
+                <div class="modal-content card dark-card" style="max-width:720px; width:92%;">
                     <div class="modal-header">
                         <h3>Aggiungi Esperienza</h3>
                         <button class="close-btn" onclick="hideAddExperienceForm()">×</button>
@@ -164,7 +167,7 @@
                             <textarea id="descrizione" name="descrizione" rows="4" required></textarea>
                         </div>
                         
-                        <button type="submit" class="btn-primary">Salva Esperienza</button>
+                        <button type="submit" class="btn btn-primary">Salva Esperienza</button>
                     </form>
                 </div>
             </div>
