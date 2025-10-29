@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy & GDPR - CV Manager</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="landing-dark">
+    <header class="site-header">
+        <div class="container header-inner">
+            <a class="brand" href="/">
+                <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10" fill="#2563eb"></circle>
+                </svg>
+                <span>CV Manager</span>
+            </a>
+        </div>
+    </header>
+
+    <main class="section" style="max-width:900px;margin:48px auto;">
+        <div class="card dark-card">
+            <h1>Informativa sulla privacy (GDPR)</h1>
+            <p class="text-on-dark-muted">Data effettiva: 29/10/2025</p>
+
+            <h2>1) Titolare del trattamento</h2>
+            <p>
+                Il titolare del trattamento è <strong>CV Manager</strong> (progetto didattico). Contatti: 
+                <a href="mailto:admin@cvmanagement.it">admin@cvmanagement.it</a>.
+            </p>
+
+            <h2>2) Dati raccolti</h2>
+            <ul>
+                <li><strong>Dati di registrazione</strong>: nome, cognome, email e password (solo hash; la password in chiaro non viene mai salvata).</li>
+                <li><strong>Dati di profilo</strong> (facoltativi): telefono, indirizzo, data di nascita, città, nazionalità, URL LinkedIn.</li>
+                <li><strong>CV caricati</strong>: file PDF archiviati in <code>/uploads/cv/</code>.</li>
+                <li><strong>Dati tecnici</strong>: cookie di sessione strettamente necessari al login (es. <code>session_id</code>); log tecnici minimi.</li>
+            </ul>
+
+            <h2>3) Finalità e base giuridica del trattamento</h2>
+            <ul>
+                <li><strong>Fornitura del servizio</strong> (gestione profilo, upload CV, esperienze): base giuridica <em>contratto</em> (art. 6.1.b GDPR).</li>
+                <li><strong>Sicurezza e prevenzione abusi</strong> (log tecnici minimi): <em>legittimo interesse</em> (art. 6.1.f).</li>
+                <li><strong>Comunicazioni su malfunzionamenti</strong> su richiesta dell’utente: <em>consenso</em> quando applicabile (art. 6.1.a).</li>
+            </ul>
+
+            <h2>4) Modalità di trattamento</h2>
+            <p>
+                Il trattamento avviene con strumenti elettronici e processi automatizzati. Le password sono protette
+                tramite hash e salt; le query verso il database utilizzano parametri per mitigare i rischi di injection.
+            </p>
+
+            <h2>5) Conservazione dei dati</h2>
+            <ul>
+                <li>I dati di account e profilo sono conservati finché l’account rimane attivo o finché richiesto per obblighi legali.</li>
+                <li>I CV caricati restano disponibili finché l’utente non li sostituisce o richiede la cancellazione.</li>
+                <li>I log tecnici minimi sono conservati per un periodo limitato e poi cancellati o anonimizzati.</li>
+            </ul>
+
+            <h2>6) Terze parti</h2>
+            <p>
+                Non utilizziamo servizi di profilazione o tracciamento di terze parti (es. analytics) all’interno dell’applicazione.
+                I dati sono memorizzati in un database MySQL gestito dall’amministratore del servizio. Eventuali provider di hosting
+                possono avere accesso infrastrutturale ai soli fini di manutenzione e sicurezza.
+            </p>
+
+            <h2>7) Trasferimento dati all’estero</h2>
+            <p>
+                In via ordinaria i dati non sono trasferiti verso Paesi extra-UE. Qualora, per esigenze tecniche o di hosting,
+                si rendesse necessario un trasferimento, saranno adottate misure adeguate (es. Clausole Contrattuali Standard).
+            </p>
+
+            <h2>8) Diritti dell’utente</h2>
+            <p>
+                In qualità di interessato puoi esercitare i diritti previsti dagli artt. 15–22 GDPR: accesso, rettifica, cancellazione,
+                limitazione, opposizione e, quando applicabile, portabilità dei dati. Per esercitare i diritti, scrivi a
+                <a href="mailto:admin@cvmanagement.it">admin@cvmanagement.it</a>.
+            </p>
+
+            <h2>9) Modifiche all’informativa</h2>
+            <p>
+                Ci riserviamo di aggiornare questa informativa per adeguamenti normativi o tecnici. Le modifiche saranno pubblicate in questa pagina
+                e, se rilevanti, notificate all’utente tramite avviso in-app.
+            </p>
+
+            <h2>10) Cookie</h2>
+            <p>
+                L’app utilizza esclusivamente cookie tecnici necessari al funzionamento della sessione (es. <code>session_id</code>). Non vengono utilizzati
+                cookie di profilazione o analytics. Puoi disabilitare i cookie dalle impostazioni del browser; in tal caso il login potrebbe non funzionare correttamente.
+            </p>
+
+            <div style="text-align:center;margin-top:18px;">
+                <a href="/" class="btn btn-primary">Torna alla Home</a>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

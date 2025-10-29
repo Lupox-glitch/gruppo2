@@ -276,6 +276,10 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
                 'error': session.get('error', '')
             })
         
+        elif path == '/privacy':
+            # Privacy & GDPR page
+            self._render_template('templates/privacy.html')
+        
         elif path == '/user-dashboard':
             if not session.get('user_id') or session.get('role') == 'admin':
                 self._redirect('/')

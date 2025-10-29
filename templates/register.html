@@ -50,20 +50,20 @@
 
                 <div class="form-row">
                     <div class="form-group">
-                        <div style="display:flex;justify-content:space-between;align-items:center;">
-                            <label for="password" style="margin:0;">Password</label>
-                            <button type="button" id="togglePwReg" class="btn btn-outline" style="padding:4px 8px;font-size:12px;line-height:1;">Mostra</button>
+                        <label for="password" style="margin:0;">Password</label>
+                        <div class="input-with-toggle" style="position:relative;">
+                            <input type="password" id="password" name="password" required class="password-strength form-control" placeholder="••••••••" autocomplete="new-password" style="padding-right:96px;">
+                            <button type="button" id="togglePwReg" class="btn btn-primary btn-sm" style="position:absolute; right:8px; top:50%; transform: translateY(-50%); padding:6px 10px; line-height:1;">Mostra</button>
                         </div>
-                        <input type="password" id="password" name="password" required class="password-strength" placeholder="••••••••" autocomplete="new-password">
                         <span class="error-message" id="passwordError"></span>
                         <small class="text-on-dark-muted">Minimo 8 caratteri, con maiuscole, minuscole e numeri</small>
                     </div>
                     <div class="form-group">
-                        <div style="display:flex;justify-content:space-between;align-items:center;">
-                            <label for="password_confirm" style="margin:0;">Conferma Password</label>
-                            <button type="button" id="togglePwConfirm" class="btn btn-outline" style="padding:4px 8px;font-size:12px;line-height:1;">Mostra</button>
+                        <label for="password_confirm" style="margin:0;">Conferma Password</label>
+                        <div class="input-with-toggle" style="position:relative;">
+                            <input type="password" id="password_confirm" name="password_confirm" class="password-confirm form-control" required placeholder="••••••••" autocomplete="new-password" style="padding-right:96px;">
+                            <button type="button" id="togglePwConfirm" class="btn btn-primary btn-sm" style="position:absolute; right:8px; top:50%; transform: translateY(-50%); padding:6px 10px; line-height:1;">Mostra</button>
                         </div>
-                        <input type="password" id="password_confirm" name="password_confirm" class="password-confirm" required placeholder="••••••••" autocomplete="new-password">
                         <span class="error-message" id="confirmPasswordError"></span>
                     </div>
                 </div>
