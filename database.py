@@ -15,29 +15,81 @@ import hashlib
 from datetime import datetime
 
 import mysql.connector
+from mysql.connector import Error, errorcode
 
 # MySQL configuration from environment
 MYSQL_HOST = os.getenv('MYSQL_HOST', 'localhost')
 MYSQL_PORT = int(os.getenv('MYSQL_PORT', '3306'))
 MYSQL_USER = os.getenv('MYSQL_USER', 'root')                    # dipende da come lo setti nel sistema  
-MYSQL_PASSWORD = os.getenv('MYSQL_PASSWORD', 'PasswordRoot12!') # dipende da come lo setti nel sistema 
+MYSQL_PASSWORD = os.getenv('MYSQL_PASSWORD', 'admin') # dipende da come lo setti nel sistema 
 MYSQL_DB = os.getenv('MYSQL_DB', 'cv_management')
 
 
-def get_db_connection():
-    """Get MySQL database connection with dict cursor support."""
-    conn = mysql.connector.connect(
-        host=MYSQL_HOST,
-        port=MYSQL_PORT,
-        user=MYSQL_USER,
-        password=MYSQL_PASSWORD,
-        database=MYSQL_DB,
-        autocommit=False,
-    )
-    return conn
+def _ensure_database_exists():
+    """Ensure the target MySQL database exists; create it if missing."""
+    try:
+        # Connect to server without selecting a database
+        conn = mysql.connector.connect(
+            host=MYSQL_HOST,
+            port=MYSQL_PORT,
+            user=MYSQL_USER,
+            password=MYSQL_PASSWORD,
+            autocommit=True,
+        )
+        cur = conn.cursor()
+        cur.execute(
+            f"CREATE DATABASE IF NOT EXISTS `{MYSQL_DB}` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+        )
+        cur.close()
+        conn.close()
+        print(f"✓ Verified database exists: {MYSQL_DB}")
+    except Error as err:
+        # Surface a clear, actionable message
+        msg = (
+            f"Failed to ensure database exists (host={MYSQL_HOST} port={MYSQL_PORT} user={MYSQL_USER}). "
+            f"MySQL error {getattr(err, 'errno', '?')}: {err}"
+        )
+        raise RuntimeError(msg) from err
 
-def salt_generation(length=16):    # genera salt randomico 
-    return os.urandom(length)
+
+def get_db_connection():
+    """Get MySQL database connection, auto-creating the DB if missing, with helpful errors."""
+    try:
+        conn = mysql.connector.connect(
+            host=MYSQL_HOST,
+            port=MYSQL_PORT,
+            user=MYSQL_USER,
+            password=MYSQL_PASSWORD,
+            database=MYSQL_DB,
+            autocommit=False,
+        )
+        return conn
+    except Error as err:
+        # Handle "Unknown database" by creating it, then retry once
+        if getattr(err, 'errno', None) == errorcode.ER_BAD_DB_ERROR:
+            _ensure_database_exists()
+            conn = mysql.connector.connect(
+                host=MYSQL_HOST,
+                port=MYSQL_PORT,
+                user=MYSQL_USER,
+                password=MYSQL_PASSWORD,
+                database=MYSQL_DB,
+                autocommit=False,
+            )
+            return conn
+        elif getattr(err, 'errno', None) in (errorcode.ER_ACCESS_DENIED_ERROR, errorcode.ER_DBACCESS_DENIED_ERROR):
+            raise RuntimeError(
+                "Access denied when connecting to MySQL. Check MYSQL_USER and MYSQL_PASSWORD environment variables."
+            ) from err
+        elif getattr(err, 'errno', None) in (errorcode.CR_CONN_HOST_ERROR, errorcode.CR_CONNECTION_ERROR, errorcode.CR_CONN_UNKNOW_PROTOCOL):
+            raise RuntimeError(
+                f"Cannot connect to MySQL at {MYSQL_HOST}:{MYSQL_PORT}. Ensure the server is running and reachable."
+            ) from err
+        else:
+            raise
+
+def salt_generation(length=16):    # genera salt randomico (stringa esadecimale)
+    return os.urandom(length).hex()
 
 
 def hash_password(password,salt):
@@ -138,17 +190,17 @@ def create_default_users():
         return  # Users already exist
     
     # Admin user
-    salt=salt_generation()
+    salt = salt_generation()
     cursor.execute(
-        'INSERT INTO users (email, password_hash, nome, cognome, role) VALUES (%s, %s, %s, %s, %s)',
-        ('admin@cvmanagement.it', hash_password('admin123',salt), salt, 'Admin', 'Sistema', 'admin')
+        'INSERT INTO users (email, password_hash, salt, nome, cognome, role) VALUES (%s, %s, %s, %s, %s, %s)',
+        ('admin@cvmanagement.it', hash_password('admin123', salt), salt, 'Admin', 'Sistema', 'admin')
     )
     
     # Student user
-    salt=salt_generation()
+    salt = salt_generation()
     cursor.execute(
-        'INSERT INTO users (email, password_hash, nome, cognome, role) VALUES (%s, %s, %s, %s, %s)',
-        ('student@test.it', hash_password('student123',salt), salt, 'Mario', 'Rossi', 'student')
+        'INSERT INTO users (email, password_hash, salt, nome, cognome, role) VALUES (%s, %s, %s, %s, %s, %s)',
+        ('student@test.it', hash_password('student123', salt), salt, 'Mario', 'Rossi', 'student')
     )
     
     student_id = cursor.lastrowid

@@ -25,6 +25,15 @@ SECRET_KEY = secrets.token_hex(32)
 # Session storage (in-memory, for simplicity)
 SESSIONS = {}
 
+# Ensure database schema exists at startup (safe: uses IF NOT EXISTS)
+try:
+    from database import create_tables
+    create_tables()
+    print("✓ Database schema ensured")
+except Exception as e:
+    # Don't crash the server on startup; surface a helpful message instead.
+    print(f"Database init warning: {e}")
+
 class CVHandler(http.server.BaseHTTPRequestHandler):
     """HTTP Request Handler for CV Management System"""
     
