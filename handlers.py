@@ -105,7 +105,7 @@ def handle_register(data):
     conn.commit()
     conn.close()
     
-    return {'success': True, 'message': 'Registrazione completata!'}
+    return {'success': True}
 
 
 def handle_update_profile(user_id, data):

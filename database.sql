@@ -14,8 +14,6 @@ CREATE TABLE IF NOT EXISTS users (
 --  nazionalita' la metto come dato del cv non dell'utente 
 --  data_nascita che troviamo nei dati del cv inutile ripeterla 
     role ENUM('student', 'admin') DEFAULT 'student',
---    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
---    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_email (email),
     INDEX idx_role (role)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -31,10 +29,6 @@ CREATE TABLE IF NOT EXISTS cv_data (
     citta VARCHAR(100),
     nazionalita VARCHAR(100),
     linkedin_url VARCHAR(255),
-    cv_file_path VARCHAR(255),
---  cv_uploaded_at TIMESTAMP NULL,
---  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
---  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     INDEX idx_user_id (user_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -50,8 +44,6 @@ CREATE TABLE IF NOT EXISTS experiences (
     data_fine DATE,
     descrizione TEXT,
     is_current BOOLEAN DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     INDEX idx_user_id (user_id),
     INDEX idx_tipo (tipo)
@@ -69,4 +61,12 @@ ON DUPLICATE KEY UPDATE id=id;
 -- Password: student123
 INSERT INTO users (email, password_hash, nome, cognome, role) 
 VALUES ('student@test.it', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'Mario', 'Rossi', 'student')
+ON DUPLICATE KEY UPDATE id=id;
+
+INSERT INTO users (email, password_hash, nome, cognome, role) 
+VALUES ('prova@test.it', 'd2c8e3b5a1f09c7d4e6f8a2b0c4d6e8f1a3b5c7d9e1f0a8b2c4d6e8f0a1b2c3d', '4f8a3d1c9b2e5f7a0c1b3d5e7f9a2c4d', 'gennaro', 'prova', 'student')
+ON DUPLICATE KEY UPDATE id=id;
+
+INSERT INTO users (email, password_hash, nome, cognome, role) 
+VALUES ('admin@test.it', 'd2c8e3b5a1f09c7d4e6f8a2b0c4d6e8f1a3b5c7d9e1f0a8b2c4d6e8f0a1b2c3d', '4f8a3d1c9b2e5f7a0c1b3d5e7f9a2c4d', 'gennaro', 'bullo', 'admin')
 ON DUPLICATE KEY UPDATE id=id;

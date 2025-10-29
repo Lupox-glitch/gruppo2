@@ -34,6 +34,7 @@ except Exception as e:
     # Don't crash the server on startup; surface a helpful message instead.
     print(f"Database init warning: {e}")
 
+
 class CVHandler(http.server.BaseHTTPRequestHandler):
     """HTTP Request Handler for CV Management System"""
     
