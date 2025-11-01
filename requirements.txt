@@ -1,1 +1,2 @@
-mysql-connector-python>=8.0,<9.0
+mysql-connector-python>=8.0,<9.0  -- pip install mysql-connector-python==8.4.0
+reportlab --pip install reportlab
