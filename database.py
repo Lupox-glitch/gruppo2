@@ -21,7 +21,7 @@ import mysql.connector
 MYSQL_HOST = os.getenv('MYSQL_HOST', 'localhost')
 MYSQL_PORT = int(os.getenv('MYSQL_PORT', '3306'))
 MYSQL_USER = os.getenv('MYSQL_USER', 'root')                    # dipende da come lo setti nel sistema  
-MYSQL_PASSWORD = os.getenv('MYSQL_PASSWORD', 'PasswordRoot12!') # dipende da come lo setti nel sistema 
+MYSQL_PASSWORD = os.getenv('MYSQL_PASSWORD', '110605') # dipende da come lo setti nel sistema 
 MYSQL_DB = os.getenv('MYSQL_DB', 'cv_management')
 
 
@@ -92,11 +92,15 @@ def create_tables():
             nazionalita VARCHAR(100),
             linkedin_url VARCHAR(255),
             cv_file_path VARCHAR(255),
+            hobby TEXT,
+            skills TEXT,
+            languages TEXT,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
             INDEX idx_user_id (user_id)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         """
     )
+
 
     # Experiences table
     cursor.execute(
@@ -110,7 +114,7 @@ def create_tables():
             data_inizio DATE NOT NULL,
             data_fine DATE,
             descrizione TEXT,
-            is_current TINYINT(1) DEFAULT 0,
+            is_current BOOLEAN DEFAULT 0,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
             INDEX idx_user_id (user_id),
             INDEX idx_tipo (tipo)

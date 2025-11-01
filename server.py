@@ -17,7 +17,7 @@ from pathlib import Path
 
 # Configuration
 HOST = 'localhost'
-PORT = 8000
+PORT = 8080
 BASE_DIR = Path(__file__).parent
 UPLOAD_DIR = BASE_DIR / 'uploads' / 'cv'
 SECRET_KEY = secrets.token_hex(32)
@@ -115,7 +115,10 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
         
         # Simple variable replacement {{variable}}
         for key, value in context.items():
-            content = content.replace('{{' + key + '}}', str(value))
+            if value!='None':
+                content = content.replace('{{' + key + '}}', str(value))
+            else:
+                content = content.replace('{{'+ key +'}}', '')
         
         self._set_headers()
         self.wfile.write(content.encode('utf-8'))
@@ -154,7 +157,7 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
         if content_length == 0:
             return {}
         
-        post_data = self.rfile.read(content_length).decode('utf-8')
+        post_data = self.rfile.read(content_length).decode('utf-8', errors='replace')
         
         # Check content type
         content_type = self.headers.get('Content-Type', '')
@@ -276,10 +279,12 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
                 'error': session.get('error', '')
             })
         
+
         elif path == '/privacy':
             # Privacy & GDPR page
             self._render_template('templates/privacy.html')
         
+
         elif path == '/user-dashboard':
             if not session.get('user_id') or session.get('role') == 'admin':
                 self._redirect('/')
@@ -289,6 +294,9 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
             data = get_user_dashboard_data(session.get('user_id'))
             self._render_template('templates/user-dashboard.html', data)
         
+        
+
+
         elif path == '/admin-dashboard':
             if not session.get('user_id') or session.get('role') != 'admin':
                 self._redirect('/')
@@ -301,6 +309,28 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
             data['user_cognome'] = session.get('cognome', 'Sistema')
             self._render_template('templates/admin-dashboard.html', data)
         
+
+        elif path == '/admin-view-student':
+            if not session.get('user_id') or session.get('role') != 'admin':
+                self._redirect('/')
+                return
+            
+            student_id = query.get('id')
+            if not student_id:
+                self._send_error(400, "ID studente mancante")
+                return
+            
+            from handlers import get_admin_view_student_data
+            data = get_admin_view_student_data(int(student_id))
+            
+            if not data:
+                self._send_error(404, "Studente non trovato")
+                return
+            
+            self._render_template('templates/admin-view-student.html', data)
+        
+
+
         elif path == '/logout':
             cookie = self._destroy_session()
             self._redirect('/', set_cookie=cookie)
@@ -325,8 +355,9 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
         
         # Import handlers
         from handlers import (
-            handle_login, handle_register, handle_upload_cv,
-            handle_update_profile, handle_add_experience, handle_delete_experience
+            handle_login, handle_register, handle_upload_cv,handle_guided_cv_creation,
+            handle_update_profile, handle_add_experience, handle_delete_experience,
+            handle_admin_delete_user
         )
         
         # Route handling
@@ -387,6 +418,16 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
             result = handle_upload_cv(session.get('user_id'), post_data.get('files', {}))
             self._send_json(result)
         
+        
+        elif path == '/api/generate-cv':
+            if not session.get('user_id'):
+                self._send_json({'success': False, 'error': 'Non autenticato'}, 401)
+                return
+            
+            result = handle_guided_cv_creation(session.get('user_id'), post_data.get('files', {}))
+            self._send_json(result)
+        
+
         elif path == '/api/update-profile':
             if not session.get('user_id'):
                 self._send_json({'success': False, 'error': 'Non autenticato'}, 401)
@@ -400,8 +441,11 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
                 self._send_json({'success': False, 'error': 'Non autenticato'}, 401)
                 return
             
+          
             result = handle_add_experience(session.get('user_id'), post_data)
             self._send_json(result)
+        
+
 
         elif path == '/api/delete-experience':
             if not session.get('user_id'):
@@ -417,9 +461,40 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
             result = handle_delete_experience(session.get('user_id'), exp_id)
             self._send_json(result)
         
-        else:
-            self._send_error(404, "Endpoint not found")
+
+        elif path == '/api/admin/delete-user':
+                if not session.get('user_id') or session.get('role') != 'admin':
+                    self._send_json({'success': False, 'error': 'Non autorizzato'}, 403)
+                    return
+                
+                user_id = post_data.get('user_id')
+                if not user_id:
+                    self._send_json({'success': False, 'error': 'ID utente mancante'}, 400)
+                    return
+                
+                try:
+                    user_id = int(user_id)
+                except (TypeError, ValueError):
+                    self._send_json({'success': False, 'error': 'ID utente non valido'}, 400)
+                    return
+                
+                result = handle_admin_delete_user(user_id)
+                self._send_json(result)
+        
+
+        elif path == '/api/cv-content':
+            # Return current CV content (hobby, skills, languages) as JSON for the logged-in user
+            if not session.get('user_id'):
+                self._redirect('/login')
+                return
+            # For cv-content, use form data (flatten if multipart)
+            form_data = post_data.get('form', post_data) if isinstance(post_data, dict) and 'form' in post_data else post_data
+            from handlers import get_user_dashboard_data, add_cv_content
+            result =add_cv_content(session.get('user_id'), form_data)
+            self._redirect('/user-dashboard')
+
     
+   
     def log_message(self, format, *args):
         """Log HTTP requests"""
         print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] {format % args}")
@@ -445,8 +520,8 @@ def main():
     server = http.server.HTTPServer((HOST, PORT), CVHandler)
     print(f"""
 ╔════════════════════════════════════════════════════════════╗
-║  📄 CV Management System - Python Server                  ║
-║  🚀 Server started at: http://{HOST}:{PORT}              ║
+║  📄 CV Management System - Python Server                   ║
+║  🚀 Server started at: http://{HOST}:{PORT}               ║
 ║                                                            ║
 ║  👤 Test Accounts:                                         ║
 ║     Admin:    admin@cvmanagement.it / admin123             ║

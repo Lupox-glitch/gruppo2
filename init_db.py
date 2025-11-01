@@ -15,8 +15,8 @@ def init_database():
     print("✓ Utenti di test presenti/creati")
     print("\n✅ Database inizializzato con successo!")
     print("\nCredenziali di accesso:")
-    print("  Admin:    admin@cvmanagement.it / admin123")
-    print("  Studente: student@test.it / student123")
+    print("  Admin:    admin@cvmanagement.it / Admin123!")
+    print("  Studente: student@test.it / Student123!")
 
 
 if __name__ == "__main__":
