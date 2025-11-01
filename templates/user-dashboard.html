@@ -7,32 +7,32 @@
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <div class="dashboard-wrapper">
-        <aside class="sidebar">
-            <div class="sidebar-header">
+    <div class="contenitore-dashboard">
+        <aside class="barra-laterale">
+            <div class="intestazione-barra">
                 <h2>CV Manager</h2>
-                <span class="badge badge-primary">Studente</span>
+                <span class="etichetta primaria">Studente</span>
             </div>
             
-            <nav class="sidebar-nav">
-                <a href="/" class="nav-item">
+            <nav class="navigazione-barra">
+                <a href="/" class="elemento-nav">
                     <span>🏠</span> Home
                 </a>
-                <a href="/user-dashboard" class="nav-item active">
+                <a href="/user-dashboard" class="elemento-nav active">
                     <span>📊</span> Dashboard
                 </a>
-                <a href="/logout" class="nav-item">
+                <a href="/logout" class="elemento-nav">
                     <span>🚪</span> Logout
                 </a>
             </nav>
             
-            <div class="sidebar-footer">
+            <div class="pie-barra">
                 <p>Benvenuto, {{user_nome}} {{user_cognome}}</p>
             </div>
         </aside>
         
-        <main class="main-content">
-            <header class="dashboard-header">
+        <main class="contenuto-principale">
+            <header class="intestazione-dashboard">
                 <h1>Dashboard Studente</h1>
                 <p>Gestisci il tuo curriculum vitae e le tue esperienze</p>
             </header>
@@ -41,60 +41,60 @@
             {{error_message}}
             
             <!-- Sezione Informazioni Personali -->
-            <section class="dashboard-section">
+            <section class="sezione-dashboard">
                 <div class="section-header">
                     <h2>Informazioni Personali</h2>
-                    <button class="btn btn-secondary" onclick="toggleEditMode()">Modifica</button>
+                    <button class="bottone-secondario" onclick="toggleEditMode()">Modifica</button>
                 </div>
                 
-                <div class="card">
-                    <form method="POST" action="/api/update-profile" id="profileForm">
-                        <div class="form-row">
-                            <div class="form-group">
+                <div class="scheda">
+                    <form method="POST" action="/api/update-profile" id="formProfilo">
+                        <div class="riga-form">
+                            <div class="gruppo-form">
                                 <label for="nome">Nome:</label>
-                                <input type="text" id="nome" name="nome" value="{{user_nome}}" readonly class="form-control">
+                                <input type="text" id="nome" name="nome" value="{{user_nome}}" readonly class="controllo-form">
                             </div>
                             
-                            <div class="form-group">
+                            <div class="gruppo-form">
                                 <label for="cognome">Cognome:</label>
-                                <input type="text" id="cognome" name="cognome" value="{{user_cognome}}" readonly class="form-control">
+                                <input type="text" id="cognome" name="cognome" value="{{user_cognome}}" readonly class="controllo-form">
                             </div>
                         </div>
 
-                        <div class="form-group">
+                        <div class="gruppo-form">
                             <label for="email">Email:</label>
-                            <input type="email" id="email" name="email" value="{{user_email}}" readonly required class="form-control">
+                            <input type="email" id="email" name="email" value="{{user_email}}" readonly required class="controllo-form">
                         </div>
                         
-                        <div class="form-row">
-                            <div class="form-group">
+                        <div class="riga-form">
+                            <div class="gruppo-form">
                                 <label for="data_nascita">Data di Nascita:</label>
-                                <input type="date" id="data_nascita" name="data_nascita" value="{{data_nascita}}" readonly class="form-control">
+                                <input type="date" id="data_nascita" name="data_nascita" value="{{data_nascita}}" readonly class="controllo-form">
                             </div>
                             
-                            <div class="form-group">
+                            <div class="gruppo-form">
                                 <label for="telefono">Telefono:</label>
-                                <input type="tel" id="telefono" name="telefono" value="{{telefono}}" readonly class="form-control">
+                                <input type="tel" id="telefono" name="telefono" value="{{telefono}}" readonly class="controllo-form">
                             </div>
                         </div>
                         
-                        <div class="form-group">
+                        <div class="gruppo-form">
                             <label for="indirizzo">Indirizzo:</label>
-                            <input type="text" id="indirizzo" name="indirizzo" value="{{indirizzo}}" readonly class="form-control">
+                            <input type="text" id="indirizzo" name="indirizzo" value="{{indirizzo}}" readonly class="controllo-form">
                         </div>
 
-                        <div class="form-row">
-                            <div class="form-group">
+                        <div class="riga-form">
+                            <div class="gruppo-form">
                                 <label for="citta">Città:</label>
-                                <input type="text" id="citta" name="citta" value="{{citta}}" readonly class="form-control">
+                                <input type="text" id="citta" name="citta" value="{{citta}}" readonly class="controllo-form">
                             </div>
-                            <div class="form-group">
+                            <div class="gruppo-form">
                                 <label for="linkedin_url">LinkedIn (URL):</label>
-                                <input type="url" id="linkedin_url" name="linkedin_url" value="{{linkedin_url}}" readonly placeholder="https://www.linkedin.com/in/username" class="form-control">
+                                <input type="url" id="linkedin_url" name="linkedin_url" value="{{linkedin_url}}" readonly placeholder="https://www.linkedin.com/in/username" class="controllo-form">
                             </div>
                         </div>
                         
-                        <button type="submit" class="btn btn-primary" id="saveProfileBtn" style="display: none;">
+                        <button type="submit" class="bottone-primario" id="bottoneSalvaProfilo" style="display: none;">
                             Salva Modifiche
                         </button>
                     </form>
@@ -102,131 +102,131 @@
             </section>
             
             <!-- Costruttore CV -->
-            <section class="dashboard-section">
+            <section class="sezione-dashboard">
                 <div class="section-header">
                     <h2>Costruisci il tuo CV</h2>
-                    <button class="btn btn-primary" onclick="document.getElementById('cvBuilderForm').scrollIntoView({behavior:'smooth'})">✏️ Modifica Contenuto</button>
+                    <button class="bottone-primario" onclick="document.getElementById('formCostruttoreCV').scrollIntoView({behavior:'smooth'})">✏️ Modifica Contenuto</button>
                 </div>
                 
-                <div class="card">
+                <div class="scheda">
                     {{cv_section}}
                     
-                    <form method="POST" action="/api/cv-content" id="cvBuilderForm">
+                    <form method="POST" action="/api/cv-content" id="formCostruttoreCV">
                         <h3>Contenuto del CV</h3>
-                        <p class="text-muted mb-3">Compila i campi sottostanti e clicca "Genera CV PDF" per creare il tuo curriculum professionale.</p>
+                        <p class="testo-secondario mb-3">Compila i campi sottostanti e clicca "Genera CV PDF" per creare il tuo curriculum professionale.</p>
                         
-                        <div class="form-group">
-                            <label for="summary">Profilo Professionale</label>
-                            <textarea id="summary" name="summary" rows="4" placeholder="Breve descrizione del tuo profilo professionale, obiettivi e competenze principali..." class="form-control">{{cv_hobby}}</textarea>
-                            <small class="form-help">Una sintesi del tuo profilo in 3-5 righe</small>
+                        <div class="gruppo-form">
+                            <label for="riassunto">Profilo Professionale</label>
+                            <textarea id="riassunto" name="summary" rows="4" placeholder="Breve descrizione del tuo profilo professionale, obiettivi e competenze principali..." class="controllo-form">{{cv_summary}}</textarea>
+                            <small class="aiuto-form">Una sintesi del tuo profilo in 3-5 righe</small>
                         </div>
                         
-                        <div class="form-group">
-                            <label for="skills">Competenze</label>
-                            <textarea id="skills" name="skills" rows="3" placeholder="Python, JavaScript, SQL, Project Management, Marketing Digitale..." class="form-control">{{cv_skills}}</textarea>
-                            <small class="form-help">Elenca le tue competenze principali separate da virgole</small>
+                        <div class="gruppo-form">
+                            <label for="competenze">Competenze</label>
+                            <textarea id="competenze" name="skills" rows="3" placeholder="Python, JavaScript, SQL, Project Management, Marketing Digitale..." class="controllo-form">{{cv_skills}}</textarea>
+                            <small class="aiuto-form">Elenca le tue competenze principali separate da virgole</small>
                         </div>
                         
-                        <div class="form-group">
-                            <label for="languages">Lingue</label>
-                            <textarea id="languages" name="languages" rows="2" placeholder="Italiano (madrelingua), Inglese (fluente), Francese (intermedio)..." class="form-control">{{cv_languages}}</textarea>
-                            <small class="form-help">Indica le lingue e il livello di conoscenza</small>
+                        <div class="gruppo-form">
+                            <label for="lingue">Lingue</label>
+                            <textarea id="lingue" name="languages" rows="2" placeholder="Italiano (madrelingua), Inglese (fluente), Francese (intermedio)..." class="controllo-form">{{cv_languages}}</textarea>
+                            <small class="aiuto-form">Indica le lingue e il livello di conoscenza</small>
                         </div>
                         
                         <div style="display:flex;gap:1rem;">
-                            <button type="submit" class="btn btn-secondary">💾 Salva Contenuto</button>
-                            <button type="button" class="btn btn-primary" onclick="generateCV()">📄 Genera CV PDF</button>
+                            <button type="submit" class="bottone-secondario">💾 Salva Contenuto</button>
+                            <button type="button" class="bottone-primario" onclick="generateCV()">📄 Genera CV PDF</button>
                         </div>
                     </form>
                     
                     <div style="margin-top:1rem;">
-                        <p class="text-muted"><strong>Nota:</strong> Il CV generato includerà automaticamente i tuoi dati personali, esperienze lavorative e formative già inserite.</p>
+                        <p class="testo-secondario"><strong>Nota:</strong> Il CV generato includerà automaticamente i tuoi dati personali, esperienze lavorative e formative già inserite.</p>
                     </div>
                 </div>
             </section>
             
             <!-- Caricamento CV (Metodo Precedente) -->
-            <section class="dashboard-section">
+            <section class="sezione-dashboard">
                 <div class="section-header">
                     <h2>Carica CV Esistente</h2>
                 </div>
                 
-                <div class="card">
-                    <p class="text-muted mb-2">Se hai già un CV in PDF, puoi caricarlo direttamente qui:</p>
-                    <form method="POST" action="/api/upload-cv" enctype="multipart/form-data" id="cvUploadForm">
-                        <div class="form-group">
-                            <label for="cv_file">Seleziona file PDF (max 5MB):</label>
-                            <input type="file" id="cv_file" name="cv_file" accept=".pdf" required>
+                <div class="scheda">
+                    <p class="testo-secondario mb-2">Se hai già un CV in PDF, puoi caricarlo direttamente qui:</p>
+                    <form method="POST" action="/api/upload-cv" enctype="multipart/form-data" id="formCaricaCV">
+                        <div class="gruppo-form">
+                            <label for="file_cv">Seleziona file PDF (max 5MB):</label>
+                            <input type="file" id="file_cv" name="cv_file" accept=".pdf" required>
                         </div>
-                        <button type="submit" class="btn btn-primary">Carica CV</button>
+                        <button type="submit" class="bottone-primario">Carica CV</button>
                     </form>
                 </div>
             </section>
             
             <!-- Sezione Esperienze Lavorative -->
-            <section class="dashboard-section">
+            <section class="sezione-dashboard">
                 <div class="section-header">
                     <h2>Esperienze Lavorative</h2>
-                    <button class="btn btn-primary" onclick="showAddExperienceForm('lavoro')">+ Aggiungi</button>
+                    <button class="bottone-primario" onclick="showAddExperienceForm('lavoro')">+ Aggiungi</button>
                 </div>
                 
-                <div class="grid grid-2">
+                <div class="griglia-2">
                     {{esperienze_lavorative}}
                 </div>
             </section>
             
             <!-- Sezione Esperienze Formative -->
-            <section class="dashboard-section">
+            <section class="sezione-dashboard">
                 <div class="section-header">
                     <h2>Esperienze Formative</h2>
-                    <button class="btn btn-primary" onclick="showAddExperienceForm('formazione')">+ Aggiungi</button>
+                    <button class="bottone-primario" onclick="showAddExperienceForm('formazione')">+ Aggiungi</button>
                 </div>
                 
-                <div class="grid grid-2">
+                <div class="griglia-2">
                     {{esperienze_formative}}
                 </div>
             </section>
             
-            <!-- Modale Aggiungi Esperienza (nascosto) -->
-            <div id="addExperienceModal" class="modal" style="display:none; position:fixed; inset:0; background: rgba(0,0,0,.5); align-items:center; justify-content:center; z-index:100;">
-                <div class="modal-content card dark-card" style="max-width:720px; width:92%;">
-                    <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+            <!-- popup Aggiungi Esperienza (nascosto) -->
+            <div id="popupAggiungiEsperienza" class="popup" style="display:none; position:fixed; inset:0; background: rgba(0,0,0,.5); align-items:center; justify-content:center; z-index:100;">
+                <div class="corpo-popup scheda scheda-scura" style="max-width:720px; width:92%;">
+                    <div class="testata-popup" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
                         <h3 style="color: #fff; margin:0;">Aggiungi Esperienza</h3>
-                        <button class="close-btn" onclick="hideAddExperienceForm()" style="background:rgba(255,255,255,0.1); border:none; color:#fff; font-size:24px; width:32px; height:32px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">×</button>
+                        <button class="chiudi" onclick="hideAddExperienceForm()" style="background:rgba(255,255,255,0.1); border:none; color:#fff; font-size:24px; width:32px; height:32px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">×</button>
                     </div>
                     
-                    <form method="POST" action="/api/add-experience" id="addExperienceForm">
-                        <input type="hidden" id="exp_tipo" name="tipo" value="">
+                    <form method="POST" action="/api/add-experience" id="formAggiungiEsperienza">
+                        <input type="hidden" id="tipo_esperienza" name="tipo" value="">
                         
-                        <div class="form-group">
+                        <div class="gruppo-form">
                             <label for="titolo" style="color: #fff;">Titolo:</label>
-                            <input type="text" id="titolo" name="titolo" required class="form-control">
+                            <input type="text" id="titolo" name="titolo" required class="controllo-form">
                         </div>
                         
-                        <div class="form-group">
+                        <div class="gruppo-form">
                             <label for="azienda" style="color: #fff;">Azienda/Istituzione:</label>
-                            <input type="text" id="azienda" name="azienda" required class="form-control">
+                            <input type="text" id="azienda" name="azienda" required class="controllo-form">
                         </div>
                         
-                        <div class="form-row">
-                            <div class="form-group">
+                        <div class="riga-form">
+                            <div class="gruppo-form">
                                 <label for="data_inizio" style="color: #fff;">Data Inizio:</label>
-                                <input type="date" id="data_inizio" name="data_inizio" required class="form-control">
+                                <input type="date" id="data_inizio" name="data_inizio" required class="controllo-form">
                             </div>
                             
-                            <div class="form-group">
+                            <div class="gruppo-form">
                                 <label for="data_fine" style="color: #fff;">Data Fine:</label>
-                                <input type="date" id="data_fine" name="data_fine" class="form-control">
+                                <input type="date" id="data_fine" name="data_fine" class="controllo-form">
                                 <small style="color: rgba(255,255,255,0.6);">Lascia vuoto se in corso</small>
                             </div>
                         </div>
                         
-                        <div class="form-group">
+                        <div class="gruppo-form">
                             <label for="descrizione" style="color: #fff;">Descrizione:</label>
-                            <textarea id="descrizione" name="descrizione" rows="4" required class="form-control"></textarea>
+                            <textarea id="descrizione" name="descrizione" rows="4" required class="controllo-form"></textarea>
                         </div>
                         
-                        <button type="submit" class="btn btn-primary">Salva Esperienza</button>
+                        <button type="submit" class="bottone-primario">Salva Esperienza</button>
                     </form>
                 </div>
             </div>
@@ -235,8 +235,8 @@
     
     <script>
         function toggleEditMode() {
-            const inputs = document.querySelectorAll('#profileForm input');
-            const saveBtn = document.getElementById('saveProfileBtn');
+            const inputs = document.querySelectorAll('#formProfilo input');
+            const saveBtn = document.getElementById('bottoneSalvaProfilo');
             
             inputs.forEach(input => {
                 input.readOnly = !input.readOnly;
@@ -248,12 +248,12 @@
         function showAddExperienceForm(tipo) {
             // Assicuriamo di passare i valori attesi: 'lavoro' o 'formazione'
             const normalized = (tipo === 'lavorativa') ? 'lavoro' : (tipo === 'formativa' ? 'formazione' : tipo);
-            document.getElementById('exp_tipo').value = normalized;
-            document.getElementById('addExperienceModal').style.display = 'flex';
+            document.getElementById('tipo_esperienza').value = normalized;
+            document.getElementById('popupAggiungiEsperienza').style.display = 'flex';
         }
         
         function hideAddExperienceForm() {
-            document.getElementById('addExperienceModal').style.display = 'none';
+            document.getElementById('popupAggiungiEsperienza').style.display = 'none';
         }
         
         function deleteExperience(id) {

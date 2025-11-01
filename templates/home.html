@@ -6,11 +6,11 @@
     <title>Home - Sistema Gestione CV</title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
-<body class="landing-dark">
+<body class="sfondo-scuro">
     <!-- Header Sticky Trasparente -->
-    <header class="site-header">
-        <div class="container header-inner">
-            <a class="brand" href="/">
+    <header class="intestazione-sito">
+        <div class="contenitore interno-intestazione">
+            <a class="marchio" href="/">
                 <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
                     <defs>
                         <linearGradient id="g-home" x1="0" y1="0" x2="1" y2="1">
@@ -22,112 +22,112 @@
                 </svg>
                 <span>CV Manager</span>
             </a>
-            <nav class="nav">
+            <nav class="navigazione">
                 <a href="#features">Funzionalità</a>
                 <a href="#faq">FAQ</a>
                 <a href="/user-dashboard">Dashboard</a>
             </nav>
-            <div class="actions">
-                <a class="btn btn-outline" href="/login">Accedi</a>
-                <a class="btn btn-primary" href="/register">Registrati</a>
+            <div class="azioni">
+                <a class="bottone-contorno" href="/login">Accedi</a>
+                <a class="bottone-primario" href="/register">Registrati</a>
             </div>
-            <button class="burger" aria-label="Apri menu" aria-expanded="false" id="burger">
+            <button class="hamburger" aria-label="Apri menu" aria-expanded="false" id="hamburger">
                 <span></span><span></span><span></span>
             </button>
         </div>
     </header>
 
     <!-- Menu Mobile -->
-    <div class="mobile-menu" id="mobileMenu" hidden>
+    <div class="menu-mobile" id="menuMobile" hidden>
         <nav>
             <a href="#features">Funzionalità</a>
             <a href="#faq">FAQ</a>
             <a href="/user-dashboard">Dashboard</a>
-            <a class="btn btn-primary" href="/login">Accedi</a>
-            <a class="btn btn-secondary" href="/register">Registrati</a>
+            <a class="bottone-primario" href="/login">Accedi</a>
+            <a class="bottone-secondario" href="/register">Registrati</a>
         </nav>
     </div>
 
     <!-- Sezione Hero (Scura) -->
-    <section class="card dark-card dark-hero section" style="text-align:center;">
+    <section class="sezione-hero" style="text-align:center;">
         <div style="max-width:820px;margin:0 auto;">
-            <h1 class="hero-animate-1" style="font-size:clamp(32px,4.2vw,54px);line-height:1.05;margin:0 0 14px;font-weight:800;font-family:'Space Grotesk',Inter,-apple-system;">La tua <span class="gradient">carriera</span>, in ordine.</h1>
-            <div class="hero-animate-2">
+            <h1 class="animazione-entrata-1" style="font-size:clamp(32px,4.2vw,54px);line-height:1.05;margin:0 0 14px;font-weight:800;font-family:'Space Grotesk',Inter,-apple-system;">La tua <span class="testo-sfumato">carriera</span>, in ordine.</h1>
+            <div class="animazione-entrata-2">
                 {{welcome_section}}
-                <p class="text-on-dark-muted mb-3">Carica il tuo CV, gestisci i tuoi dati e tieni traccia delle tue esperienze in un unico posto.</p>
+                <p class="testo-chiaro-scuro mb-3">Carica il tuo CV, gestisci i tuoi dati e tieni traccia delle tue esperienze in un unico posto.</p>
             </div>
-            <div class="flex flex-center gap-2 hero-animate-3">
+            <div class="flex centrato gap-2 animazione-entrata-3">
                 {{cta_section}}
-                <a class="btn btn-outline" href="#features">Scopri le funzionalità</a>
+                <a class="bottone-contorno" href="#features">Scopri le funzionalità</a>
             </div>
             
         </div>
     </section>
 
     <!-- Azioni Rapide (Scure) -->
-    <section class="section">
-        <div class="quick-actions">
-            <a href="/login" class="card dark-card hover-lift btn btn-block" style="text-align:left;">
+    <section class="sezione">
+        <div class="scorciatoie">
+            <a href="/login" class="carta-interattiva" style="text-align:left;">
                 <h3>🚀 Inizia Subito</h3>
-                <p class="text-on-dark-muted">Accedi o registrati in pochi secondi.</p>
+                <p class="testo-chiaro-scuro">Accedi o registrati in pochi secondi.</p>
             </a>
-            <a href="/user-dashboard" class="card dark-card hover-lift btn btn-block" style="text-align:left;">
+            <a href="/user-dashboard" class="carta-interattiva" style="text-align:left;">
                 <h3>📤 Carica CV</h3>
-                <p class="text-on-dark-muted">Carica il tuo curriculum in formato PDF.</p>
+                <p class="testo-chiaro-scuro">Carica il tuo curriculum in formato PDF.</p>
             </a>
-            <a href="/user-dashboard" class="card dark-card hover-lift btn btn-block" style="text-align:left;">
+            <a href="/user-dashboard" class="carta-interattiva" style="text-align:left;">
                 <h3>💼 Aggiungi Esperienza</h3>
-                <p class="text-on-dark-muted">Registra esperienze lavorative o formative.</p>
+                <p class="testo-chiaro-scuro">Registra esperienze lavorative o formative.</p>
             </a>
         </div>
     </section>
 
-    <div class="divider"></div>
+    <div class="separatore"></div>
 
     <!-- Funzionalità (Card Scure) -->
-    <section id="features" class="section grid grid-3">
-        <div class="card dark-card hover-lift">
+    <section id="features" class="sezione griglia-3">
+        <div class="carta-scura">
             <h3>📄 CV in PDF</h3>
-            <p class="text-on-dark-muted">Carica e conserva il tuo curriculum in formato PDF con controlli di sicurezza e dimensione.</p>
+            <p class="testo-chiaro-scuro">Carica e conserva il tuo curriculum in formato PDF con controlli di sicurezza e dimensione.</p>
         </div>
-        <div class="card dark-card hover-lift">
+        <div class="carta-scura">
             <h3>👤 Profilo Completo</h3>
-            <p class="text-on-dark-muted">Aggiorna facilmente dati anagrafici, contatti, indirizzo e link a LinkedIn.</p>
+            <p class="testo-chiaro-scuro">Aggiorna facilmente dati anagrafici, contatti, indirizzo e link a LinkedIn.</p>
         </div>
-        <div class="card dark-card hover-lift">
+        <div class="carta-scura">
             <h3>💼 Esperienze</h3>
-            <p class="text-on-dark-muted">Aggiungi esperienze lavorative e formative con periodi e descrizioni.</p>
+            <p class="testo-chiaro-scuro">Aggiungi esperienze lavorative e formative con periodi e descrizioni.</p>
         </div>
     </section>
 
 
     <!-- Come Funziona (Scuro) -->
-    <section class="section">
-        <div class="section-header">
+    <section class="sezione">
+    <div class="section-header">
             <h2>Come funziona</h2>
-            <p class="text-on-dark-muted">Tre semplici passaggi per iniziare</p>
+            <p class="testo-chiaro-scuro">Tre semplici passaggi per iniziare</p>
         </div>
-        <div class="grid grid-3">
-            <div class="card dark-card hover-lift">
+        <div class="griglia-3">
+            <div class="carta-scura">
                 <h3>1. Crea l'account</h3>
-                <p class="text-on-dark-muted">Registrati con email e password sicura in meno di un minuto.</p>
+                <p class="testo-chiaro-scuro">Registrati con email e password sicura in meno di un minuto.</p>
             </div>
-            <div class="card dark-card hover-lift">
+            <div class="carta-scura">
                 <h3>2. Compila il profilo</h3>
-                <p class="text-on-dark-muted">Inserisci i tuoi dati anagrafici e collegamenti utili (es. LinkedIn).</p>
+                <p class="testo-chiaro-scuro">Inserisci i tuoi dati anagrafici e collegamenti utili (es. LinkedIn).</p>
             </div>
-            <div class="card dark-card hover-lift">
+            <div class="carta-scura">
                 <h3>3. Carica il tuo CV</h3>
-                <p class="text-on-dark-muted">Carica un PDF aggiornato e aggiungi esperienze per tenerlo organizzato.</p>
+                <p class="testo-chiaro-scuro">Carica un PDF aggiornato e aggiungi esperienze per tenerlo organizzato.</p>
             </div>
         </div>
     </section>
 
     <!-- Domande Frequenti -->
-    <section id="faq" class="section faq">
-        <div class="section-header">
+    <section id="faq" class="sezione domande-frequenti">
+    <div class="section-header">
             <h2>Domande frequenti</h2>
-            <p class="text-on-dark-muted">Tutto quello che ti serve sapere</p>
+            <p class="testo-chiaro-scuro">Tutto quello che ti serve sapere</p>
         </div>
         <details>
             <summary>Che tipo di file posso caricare?</summary>
@@ -144,27 +144,27 @@
     </section>
 
     <!-- Barra CTA (Scura) -->
-    <section class="card dark-card section" style="text-align:center;">
+    <section class="sezione-scura" style="text-align:center;">
         <h3>Pronto a iniziare?</h3>
-        <p class="text-on-dark-muted">Accedi o crea un account in pochi secondi.</p>
-        <div class="flex flex-center gap-2 mt-2">
-            <a class="btn btn-primary" href="/login">Accedi</a>
-            <a class="btn btn-secondary" href="/register">Registrati</a>
+        <p class="testo-chiaro-scuro">Accedi o crea un account in pochi secondi.</p>
+        <div class="flex centrato gap-2 mt-2">
+            <a class="bottone-primario" href="/login">Accedi</a>
+            <a class="bottone-secondario" href="/register">Registrati</a>
         </div>
     </section>
 
     <!-- Piè di Pagina -->
-    <footer class="text-center mb-4 mt-4">
-        <p class="text-on-dark-muted">&copy; 2025 CV Manager — Progetto didattico</p>
+    <footer class="testo-centrato mb-4 mt-4">
+        <p class="testo-chiaro-scuro">&copy; 2025 CV Manager — Progetto didattico</p>
         <div style="margin-top:8px;">
-            <a href="/privacy" class="btn btn-outline" style="font-size:0.9rem;padding:.4rem .75rem;">Informativa & GDPR</a>
+            <a href="/privacy" class="bottone-contorno" style="font-size:0.9rem;padding:.4rem .75rem;">Informativa & GDPR</a>
         </div>
     </footer>
 
     <script>
     (function(){
-        var burger = document.getElementById('burger');
-        var menu = document.getElementById('mobileMenu');
+        var burger = document.getElementById('hamburger');
+        var menu = document.getElementById('menuMobile');
         if(burger && menu){
             burger.addEventListener('click', function(){
                 var open = burger.getAttribute('aria-expanded') === 'true';

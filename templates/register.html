@@ -6,11 +6,11 @@
     <title>Registrazione - Sistema Gestione CV</title>
     <link rel="stylesheet" href="/css/style.css">
 </head>
-<body class="landing-dark">
-    <section class="section" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding-top:72px;padding-bottom:72px;">
-        <div class="card dark-card hover-lift" style="width:100%;max-width:520px;padding:28px;">
+<body class="sfondo-scuro">
+    <section class="sezione" style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding-top:72px;padding-bottom:72px;">
+        <div class="carta-scura" style="width:100%;max-width:520px;padding:28px;">
             <div style="text-align:center;margin-bottom:16px;">
-                <a class="brand" href="/" style="display:inline-flex;align-items:center;gap:.5rem;color:inherit;text-decoration:none;margin-bottom:8px;">
+                <a class="marchio" href="/" style="display:inline-flex;align-items:center;gap:.5rem;color:inherit;text-decoration:none;margin-bottom:8px;">
                     <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true">
                         <defs>
                             <linearGradient id="g-register" x1="0" y1="0" x2="1" y2="1">
@@ -23,56 +23,56 @@
                     <strong>CV Manager</strong>
                 </a>
                 <h1 style="margin:0;font-size:22px;">Crea il tuo account</h1>
-                <p class="text-on-dark-muted" style="margin-top:6px;">Registrati per iniziare a gestire il tuo CV</p>
+                <p class="testo-chiaro-scuro" style="margin-top:6px;">Registrati per iniziare a gestire il tuo CV</p>
             </div>
 
             {{error}}
 
-            <form method="POST" action="/register" id="registerForm" data-validate="true" novalidate>
-                <div class="form-row">
-                    <div class="form-group">
+            <form method="POST" action="/register" id="formRegistrazione" data-validate="true" novalidate>
+                <div class="riga-form">
+                    <div class="gruppo-form">
                         <label for="nome">Nome</label>
-                        <input type="text" id="nome" name="nome" required placeholder="Mario" autocomplete="given-name" class="form-control">
-                        <span class="error-message" id="nomeError"></span>
+                        <input type="text" id="nome" name="nome" required placeholder="Mario" autocomplete="given-name" class="controllo-form">
+                        <span class="messaggio-errore" id="erroreNome"></span>
                     </div>
-                    <div class="form-group">
+                    <div class="gruppo-form">
                         <label for="cognome">Cognome</label>
-                        <input type="text" id="cognome" name="cognome" required placeholder="Rossi" autocomplete="family-name" class="form-control">
-                        <span class="error-message" id="cognomeError"></span>
+                        <input type="text" id="cognome" name="cognome" required placeholder="Rossi" autocomplete="family-name" class="controllo-form">
+                        <span class="messaggio-errore" id="erroreCognome"></span>
                     </div>
                 </div>
 
-                <div class="form-group">
+                <div class="gruppo-form">
                     <label for="email">Email</label>
-                    <input type="email" id="email" name="email" required placeholder="nome@esempio.com" autocomplete="email" class="form-control">
-                    <span class="error-message" id="emailError"></span>
+                    <input type="email" id="email" name="email" required placeholder="nome@esempio.com" autocomplete="email" class="controllo-form">
+                    <span class="messaggio-errore" id="erroreEmail"></span>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group">
+                <div class="riga-form">
+                    <div class="gruppo-form">
                         <label for="password" style="margin:0;">Password</label>
-                        <div class="input-with-toggle" style="position:relative;">
-                            <input type="password" id="password" name="password" required class="password-strength form-control" placeholder="••••••••" autocomplete="new-password" style="padding-right:96px;">
-                            <button type="button" id="togglePwReg" class="btn btn-primary btn-sm" style="position:absolute; right:8px; top:50%; transform: translateY(-50%); padding:6px 10px; line-height:1;">Mostra</button>
+                        <div class="input-con-toggle" style="position:relative;">
+                            <input type="password" id="password" name="password" required class="validazione-password controllo-form" placeholder="••••••••" autocomplete="new-password" style="padding-right:96px;">
+                            <button type="button" id="togglePwReg" class="bottone-primario bottone-piccolo" style="position:absolute; right:8px; top:50%; transform: translateY(-50%); padding:6px 10px; line-height:1;">Mostra</button>
                         </div>
-                        <span class="error-message" id="passwordError"></span>
-                        <small class="text-on-dark-muted">Minimo 8 caratteri, con maiuscole, minuscole e numeri</small>
+                        <span class="messaggio-errore" id="errorePassword"></span>
+                        <small class="testo-chiaro-scuro">Minimo 8 caratteri, con maiuscole, minuscole e numeri</small>
                     </div>
-                    <div class="form-group">
+                    <div class="gruppo-form">
                         <label for="password_confirm" style="margin:0;">Conferma Password</label>
-                        <div class="input-with-toggle" style="position:relative;">
-                            <input type="password" id="password_confirm" name="password_confirm" class="password-confirm form-control" required placeholder="••••••••" autocomplete="new-password" style="padding-right:96px;">
-                            <button type="button" id="togglePwConfirm" class="btn btn-primary btn-sm" style="position:absolute; right:8px; top:50%; transform: translateY(-50%); padding:6px 10px; line-height:1;">Mostra</button>
+                        <div class="input-con-toggle" style="position:relative;">
+                            <input type="password" id="password_confirm" name="password_confirm" class="conferma-password controllo-form" required placeholder="••••••••" autocomplete="new-password" style="padding-right:96px;">
+                            <button type="button" id="togglePwConfirm" class="bottone-primario bottone-piccolo" style="position:absolute; right:8px; top:50%; transform: translateY(-50%); padding:6px 10px; line-height:1;">Mostra</button>
                         </div>
-                        <span class="error-message" id="confirmPasswordError"></span>
+                        <span class="messaggio-errore" id="erroreConfermaPassword"></span>
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary" style="width:100%;">Registrati</button>
+                <button type="submit" class="bottone-primario" style="width:100%;">Registrati</button>
             </form>
 
             <div style="text-align:center;margin-top:12px;">
-                <p class="text-on-dark-muted" style="margin:0;">Hai già un account? <a href="/login">Accedi</a></p>
+                <p class="testo-chiaro-scuro" style="margin:0;">Hai già un account? <a href="/login">Accedi</a></p>
             </div>
         </div>
     </section>

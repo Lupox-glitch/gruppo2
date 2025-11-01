@@ -7,81 +7,81 @@
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <div class="dashboard-wrapper">
-        <aside class="sidebar">
-            <div class="sidebar-header">
+    <div class="contenitore-dashboard">
+        <aside class="barra-laterale">
+            <div class="intestazione-barra">
                 <h2>CV Manager</h2>
-                <span class="badge badge-primary">Admin</span>
+                <span class="etichetta primaria">Admin</span>
             </div>
             
-            <nav class="sidebar-nav">
-                <a href="/" class="nav-item">
+            <nav class="navigazione-barra">
+                <a href="/" class="voce-menu">
                     <span>🏠</span> Home
                 </a>
-                <a href="/admin-dashboard" class="nav-item active">
+                <a href="/admin-dashboard" class="voce-menu attivo">
                     <span>📊</span> Dashboard
                 </a>
-                <a href="/logout" class="nav-item">
+                <a href="/logout" class="voce-menu">
                     <span>🚪</span> Logout
                 </a>
             </nav>
             
-            <div class="sidebar-footer">
+            <div class="pie-barra">
                 <p>Benvenuto, {{user_nome}} {{user_cognome}}</p>
             </div>
         </aside>
         
-        <main class="main-content">
-            <header class="dashboard-header">
+        <main class="contenuto-principale">
+            <header class="intestazione-dashboard">
                 <h1>Dashboard Amministratore</h1>
                 <p>Gestione completa degli studenti e dei curriculum</p>
             </header>
             
             <!-- Statistiche -->
-            <section class="section stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon">👥</div>
-                    <div class="stat-content">
+            <section class="sezione statistiche">
+                <div class="scheda-stat">
+                    <div class="icona-stat">👥</div>
+                    <div class="contenuto-stat">
                         <h3>Totale Studenti</h3>
-                        <p class="stat-number">{{total_students}}</p>
+                        <p class="numero-stat">{{total_students}}</p>
                     </div>
                 </div>
                 
-                <div class="stat-card">
-                    <div class="stat-icon">📄</div>
-                    <div class="stat-content">
+                <div class="scheda-stat">
+                    <div class="icona-stat">📄</div>
+                    <div class="contenuto-stat">
                         <h3>CV Caricati</h3>
-                        <p class="stat-number">{{total_cvs}}</p>
+                        <p class="numero-stat">{{total_cvs}}</p>
                     </div>
                 </div>
                 
-                <div class="stat-card">
-                    <div class="stat-icon">💼</div>
-                    <div class="stat-content">
+                <div class="scheda-stat">
+                    <div class="icona-stat">💼</div>
+                    <div class="contenuto-stat">
                         <h3>Esperienze Lavorative</h3>
-                        <p class="stat-number">{{total_work_exp}}</p>
+                        <p class="numero-stat">{{total_work_exp}}</p>
                     </div>
                 </div>
                 
-                <div class="stat-card">
-                    <div class="stat-icon">🎓</div>
-                    <div class="stat-content">
+                <div class="scheda-stat">
+                    <div class="icona-stat">🎓</div>
+                    <div class="contenuto-stat">
                         <h3>Esperienze Formative</h3>
-                        <p class="stat-number">{{total_edu_exp}}</p>
+                        <p class="numero-stat">{{total_edu_exp}}</p>
                     </div>
                 </div>
             </section>
             
             <!-- Sezione Lista Studenti -->
-            <section class="dashboard-section">
+            <section class="sezione-dashboard">
                 <div class="section-header">
                     <h2>Studenti Registrati</h2>
-                    <input type="text" id="searchInput" placeholder="Cerca studente..." class="form-control" style="max-width:280px;">
+                    <input type="text" id="inputRicerca" placeholder="Cerca studente..." class="controllo-form" style="max-width:280px;">
                 </div>
                 
-                <div class="card">
-                    <div class="table-wrapper">
-                        <table class="table">
+                <div class="scheda">
+                    <div class="contenitore-tabella">
+                        <table class="tabella">
                             <thead>
                                 <tr>
                                     <th>ID</th>
@@ -93,7 +93,7 @@
                                     <th>Azioni</th>
                                 </tr>
                             </thead>
-                            <tbody id="studentsTableBody">
+                            <tbody id="corpoTabellaStudenti">
                                 {{students_rows}}
                             </tbody>
                         </table>
@@ -103,108 +103,17 @@
         </main>
     </div>
     
-    <!-- Modale Modifica Utente -->
-    <div id="editUserModal" class="modal" style="display:none; position:fixed; inset:0; background: rgba(0,0,0,.5); align-items:center; justify-content:center; z-index:100;">
-        <div class="modal-content card dark-card" style="max-width:520px; width:92%;">
-            <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
-                <h3 style="color: #fff; margin:0;">Modifica Studente</h3>
-                <button class="close-btn" onclick="hideEditUserModal()" style="background:rgba(255,255,255,0.1); border:none; color:#fff; font-size:24px; width:32px; height:32px; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">×</button>
-            </div>
-            
-            <form id="editUserForm" onsubmit="return submitEditUser(event);">
-                <input type="hidden" id="edit_user_id" name="user_id">
-                
-                <div class="form-group">
-                    <label for="edit_nome" style="color: #fff;">Nome:</label>
-                    <input type="text" id="edit_nome" name="nome" required class="form-control">
-                </div>
-                
-                <div class="form-group">
-                    <label for="edit_cognome" style="color: #fff;">Cognome:</label>
-                    <input type="text" id="edit_cognome" name="cognome" required class="form-control">
-                </div>
-                
-                <div class="form-group">
-                    <label for="edit_email" style="color: #fff;">Email:</label>
-                    <input type="email" id="edit_email" name="email" required class="form-control">
-                </div>
-                
-                <button type="submit" class="btn btn-primary">Salva Modifiche</button>
-            </form>
-        </div>
-    </div>
-    
     <script>
         // Funzionalità di ricerca
-        document.getElementById('searchInput').addEventListener('keyup', function() {
+        document.getElementById('inputRicerca').addEventListener('keyup', function() {
             const searchValue = this.value.toLowerCase();
-            const rows = document.querySelectorAll('#studentsTableBody tr');
+            const rows = document.querySelectorAll('#corpoTabellaStudenti tr');
             
             rows.forEach(row => {
                 const text = row.textContent.toLowerCase();
                 row.style.display = text.includes(searchValue) ? '' : 'none';
             });
         });
-        
-        function editStudent(userId) {
-            // Recupera i dati dello studente dalla riga della tabella
-            const row = document.querySelector(`#studentsTableBody tr td:first-child`);
-            const rows = document.querySelectorAll('#studentsTableBody tr');
-            let studentData = null;
-            
-            rows.forEach(row => {
-                const cells = row.querySelectorAll('td');
-                if (cells[0] && cells[0].textContent == userId) {
-                    studentData = {
-                        id: cells[0].textContent,
-                        nome: cells[1].textContent,
-                        cognome: cells[2].textContent,
-                        email: cells[3].textContent
-                    };
-                }
-            });
-            
-            if (studentData) {
-                document.getElementById('edit_user_id').value = studentData.id;
-                document.getElementById('edit_nome').value = studentData.nome;
-                document.getElementById('edit_cognome').value = studentData.cognome;
-                document.getElementById('edit_email').value = studentData.email;
-                document.getElementById('editUserModal').style.display = 'flex';
-            }
-        }
-        
-        function hideEditUserModal() {
-            document.getElementById('editUserModal').style.display = 'none';
-        }
-        
-        function submitEditUser(event) {
-            event.preventDefault();
-            
-            const formData = new FormData(event.target);
-            const data = Object.fromEntries(formData);
-            
-            fetch('/api/admin/update-user', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            })
-            .then(response => response.json())
-            .then(result => {
-                if (result.success) {
-                    alert(result.message);
-                    location.reload();
-                } else {
-                    alert('Errore: ' + result.error);
-                }
-            })
-            .catch(error => {
-                alert('Errore di connessione: ' + error);
-            });
-            
-            return false;
-        }
         
         function deleteStudent(userId, userName) {
             if (!confirm(`Sei sicuro di voler eliminare l'utente ${userName}? Questa azione non può essere annullata.`)) {
@@ -232,7 +141,6 @@
             });
         }
         
-        // Rimosso modale Aggiungi Utente su richiesta
     </script>
 </body>
 </html>

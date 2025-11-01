@@ -7,70 +7,70 @@
     <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <div class="dashboard-wrapper">
-        <aside class="sidebar">
-            <div class="sidebar-header">
+    <div class="contenitore-dashboard">
+        <aside class="barra-laterale">
+            <div class="intestazione-barra">
                 <h2>CV Manager</h2>
-                <span class="badge badge-primary">Admin</span>
++                <span class="etichetta primaria">Admin</span>
             </div>
             
-            <nav class="sidebar-nav">
-                <a href="/" class="nav-item">
+            <nav class="navigazione-barra">
+                <a href="/" class="elemento-nav">
                     <span>🏠</span> Home
                 </a>
-                <a href="/admin-dashboard" class="nav-item">
+                <a href="/admin-dashboard" class="elemento-nav">
                     <span>📊</span> Dashboard
                 </a>
-                <a href="/logout" class="nav-item">
+                <a href="/logout" class="elemento-nav">
                     <span>🚪</span> Logout
                 </a>
             </nav>
             
-            <div class="sidebar-footer">
+            <div class="pie-barra">
                 <p>Benvenuto, Admin</p>
             </div>
         </aside>
         
-        <main class="main-content">
-            <header class="dashboard-header">
-                <a href="/admin-dashboard" class="btn btn-secondary">← Torna alla Dashboard</a>
+        <main class="contenuto-principale">
+            <header class="intestazione-dashboard">
+                <a href="/admin-dashboard" class="bottone-secondario">← Torna alla Dashboard</a>
                 <h1>Dettagli Studente</h1>
             </header>
             
             <!-- Sezione Informazioni Personali -->
-            <section class="dashboard-section">
+            <section class="sezione-dashboard">
                 <div class="section-header">
                     <h2>Informazioni Personali</h2>
                 </div>
                 
-                <div class="card">
-                    <div class="grid grid-2">
-                        <div class="info-item">
+                <div class="scheda">
+                    <div class="griglia-2">
+                        <div class="elemento-info">
                             <label>Nome:</label>
                             <span>{{nome}}</span>
                         </div>
                         
-                        <div class="info-item">
+                        <div class="elemento-info">
                             <label>Cognome:</label>
                             <span>{{cognome}}</span>
                         </div>
                         
-                        <div class="info-item">
+                        <div class="elemento-info">
                             <label>Email:</label>
                             <span>{{email}}</span>
                         </div>
                         
-                        <div class="info-item">
+                        <div class="elemento-info">
                             <label>Data di Nascita:</label>
                             <span>{{data_nascita}}</span>
                         </div>
                         
-                        <div class="info-item">
+                        <div class="elemento-info">
                             <label>Telefono:</label>
                             <span>{{telefono}}</span>
                         </div>
                         
-                        <div class="info-item">
+                        <div class="elemento-info">
                             <label>Indirizzo:</label>
                             <span>{{indirizzo}}</span>
                         </div>
@@ -79,34 +79,34 @@
             </section>
             
             <!-- Sezione Curriculum Vitae -->
-            <section class="dashboard-section">
+            <section class="sezione-dashboard">
                 <div class="section-header">
                     <h2>Curriculum Vitae</h2>
                 </div>
                 
-                <div class="card">
+                <div class="scheda">
                     {{cv_section}}
                 </div>
             </section>
             
             <!-- Sezione Esperienze Lavorative -->
-            <section class="dashboard-section">
+            <section class="sezione-dashboard">
                 <div class="section-header">
                     <h2>Esperienze Lavorative</h2>
                 </div>
                 
-                <div class="grid grid-2">
+                <div class="griglia-2">
                     {{esperienze_lavorative}}
                 </div>
             </section>
             
             <!-- Sezione Esperienze Formative -->
-            <section class="dashboard-section">
+            <section class="sezione-dashboard">
                 <div class="section-header">
                     <h2>Esperienze Formative</h2>
                 </div>
                 
-                <div class="grid grid-2">
+                <div class="griglia-2">
                     {{esperienze_formative}}
                 </div>
             </section>

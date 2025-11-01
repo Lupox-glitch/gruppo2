@@ -57,7 +57,7 @@ function validateField(field) {
         error = messages.url;
     }
     // Password strength validation
-    else if (fieldType === 'password' && field.classList.contains('password-strength') && value && !patterns.password.test(value)) {
+    else if (fieldType === 'password' && (field.classList.contains('password-strength') || field.classList.contains('validazione-password')) && value && !patterns.password.test(value)) {
         error = messages.password;
     }
     // Min length
@@ -83,8 +83,8 @@ function validateField(field) {
     }
 
     // Password confirmation
-    if (field.classList.contains('password-confirm')) {
-        const passwordField = document.querySelector('input[type="password"]:not(.password-confirm)');
+    if (field.classList.contains('password-confirm') || field.classList.contains('conferma-password')) {
+        const passwordField = document.querySelector('input[type="password"]:not(.password-confirm):not(.conferma-password)');
         if (passwordField && value !== passwordField.value) {
             error = messages.passwordMatch;
         }
@@ -124,12 +124,13 @@ function showFieldError(field, message) {
     field.classList.add('error');
     field.classList.remove('success');
     
-    const formGroup = field.closest('.form-group');
+    // Support both English and Italian class names
+    const formGroup = field.closest('.form-group') || field.closest('.gruppo-form');
     if (formGroup) {
-        let errorEl = formGroup.querySelector('.form-error');
+        let errorEl = formGroup.querySelector('.form-error') || formGroup.querySelector('.messaggio-errore');
         if (!errorEl) {
             errorEl = document.createElement('span');
-            errorEl.className = 'form-error';
+            errorEl.className = 'form-error messaggio-errore';
             field.parentNode.insertBefore(errorEl, field.nextSibling);
         }
         errorEl.textContent = message;
@@ -153,9 +154,10 @@ function showFieldSuccess(field) {
 function clearFieldError(field) {
     field.classList.remove('error', 'success');
     
-    const formGroup = field.closest('.form-group');
+    // Support both English and Italian class names
+    const formGroup = field.closest('.form-group') || field.closest('.gruppo-form');
     if (formGroup) {
-        const errorEl = formGroup.querySelector('.form-error');
+        const errorEl = formGroup.querySelector('.form-error') || formGroup.querySelector('.messaggio-errore');
         if (errorEl) {
             errorEl.style.display = 'none';
         }
