@@ -355,7 +355,7 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
         
         # Import handlers
         from handlers import (
-            handle_login, handle_register, handle_upload_cv,handle_guided_cv_creation,
+            handle_login, handle_register, handle_upload_cv,handle_download_cv,
             handle_update_profile, handle_add_experience, handle_delete_experience,
             handle_admin_delete_user
         )
@@ -416,15 +416,6 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
                 return
             
             result = handle_upload_cv(session.get('user_id'), post_data.get('files', {}))
-            self._send_json(result)
-        
-        
-        elif path == '/api/generate-cv':
-            if not session.get('user_id'):
-                self._send_json({'success': False, 'error': 'Non autenticato'}, 401)
-                return
-            
-            result = handle_guided_cv_creation(session.get('user_id'), post_data.get('files', {}))
             self._send_json(result)
         
 
@@ -493,7 +484,29 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
             result =add_cv_content(session.get('user_id'), form_data)
             self._redirect('/user-dashboard')
 
-    
+
+
+#################### PARTE CREAZIONE E DOWNLOAD CV PDF ##############################
+        elif path == '/api/generate-cv':
+            if not session.get('user_id'):
+                self._send_json({'success': False, 'error': 'Non autenticato'}, 401)
+                return
+
+            from handlers import handle_download_cv
+            result = handle_download_cv(session['user_id'])
+
+            if not result['success']:
+                self._send_json(result, 500)
+                return
+
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/pdf')
+            self.send_header('Content-Disposition', f'attachment; filename="cv_{session["user_id"]}.pdf"')
+            self.end_headers()
+            self.wfile.write(result['pdf_bytes'])
+##########################################################################################
+
+
    
     def log_message(self, format, *args):
         """Log HTTP requests"""

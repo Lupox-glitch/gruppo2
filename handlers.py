@@ -624,112 +624,19 @@ def handle_admin_delete_user(user_id):
 
 
 
-#def handle_admin_update_user(user_id, data):
-#    """Admin: Update student user information"""
-#    nome = sanitize_input(data.get('nome', '').strip())
-#    cognome = sanitize_input(data.get('cognome', '').strip())
-#    email = data.get('email', '').strip()
-#    
-#    if not all([nome, cognome, email]):
-#        return {'success': False, 'error': 'Nome, cognome e email sono obbligatori'}
-#    
-#    if not validate_email(email):
-#        return {'success': False, 'error': 'Email non valida'}
-#    
-#    conn = get_db_connection()
-#    cursor = conn.cursor(dictionary=True)
-#    
-#    # Verify user exists and is a student
-#    cursor.execute('SELECT id, role FROM users WHERE id = %s', (user_id,))
-#    user = cursor.fetchone()
-#    
-#    if not user:
-#        conn.close()
-#        return {'success': False, 'error': 'Utente non trovato'}
-#    
-#    if user['role'] != 'student':
-#        conn.close()
-#        return {'success': False, 'error': 'Non è possibile modificare amministratori'}
-#    
-#    # Check if email is used by another user
-#    cursor.execute('SELECT id FROM users WHERE email = %s AND id != %s', (email, user_id))
-#    if cursor.fetchone():
-#        conn.close()
-#        return {'success': False, 'error': 'Questa email è già utilizzata'}
-#    
-#    # Update user
-#    cursor.execute(
-#        'UPDATE users SET nome = %s, cognome = %s, email = %s WHERE id = %s',
-#        (nome, cognome, email, user_id)
-#    )
-#    
-#    conn.commit()
-#    conn.close()
-#    
-#    return {'success': True, 'message': 'Utente aggiornato con successo'}
-
-
-
-
-
 ############################## GESTIONE CV PDF ############################################
 
-def handle_guided_cv_creation(user_id, data):
-    """Handle guided CV creation and generate PDF"""
-    # Validate input data
-    anagraphic_data = {
-        'nome': sanitize_input(data.get('nome', '')),
-        'cognome': sanitize_input(data.get('cognome', '')),
-        'email': data.get('email', ''),
-        'telefono': sanitize_input(data.get('telefono', '')),
-        'data_nascita': data.get('data_nascita', ''),
-        'citta': sanitize_input(data.get('citta', '')),
-        'indirizzo': sanitize_input(data.get('indirizzo', '')),
-        'linkedin_url': data.get('linkedin_url', '')
-    }
-    
-    if not all([anagraphic_data['nome'], anagraphic_data['cognome'], anagraphic_data['email']]):
-        return {'success': False, 'error': 'Dati anagrafici incompleti'}
+# handlers.py
+from pdf_generator import generate_cv_pdf
 
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-
+def handle_download_cv(user_id):
     try:
-        # Get user experiences
-        cursor.execute(
-            'SELECT * FROM experiences WHERE user_id = %s ORDER BY data_inizio DESC',
-            (user_id,)
-        )
-        experiences = cursor.fetchall()
-
-        # Generate PDF using the collected data
-        from pdf_generator import generate_cv_pdf
-        pdf_filename = f'cv_generated_{user_id}_{datetime.now().strftime("%Y%m%d%H%M%S")}.pdf'
-        pdf_path = UPLOAD_DIR / pdf_filename
-
-        UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
-        
-        generate_cv_pdf(pdf_path, anagraphic_data, experiences)
-        
-        # Update database with new CV path
-        relative_path = f'uploads/cv/{pdf_filename}'
-        cursor.execute(
-            'UPDATE cv_data SET cv_file_path = %s WHERE user_id = %s',
-            (relative_path, user_id)
-        )
-        
-        conn.commit()
-        return {
-            'success': True,
-            'message': 'CV generato con successo!'#,
-            #'pdf_path': relative_path
-        }
-    
+        pdf_bytes = generate_cv_pdf(user_id)
+        return {'success': True, 'pdf_bytes': pdf_bytes}
     except Exception as e:
-        return {'success': False, 'error': f'Errore durante la generazione del CV: {str(e)}'}
-    
-    finally:
-        conn.close()
+        return {'success': False, 'error': str(e)}
+
+################################################################################################
 
 def get_cv_data(user_id):
     """Get CV data for a specific user"""
