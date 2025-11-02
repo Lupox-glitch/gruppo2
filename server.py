@@ -113,12 +113,13 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
         with open(template_file, 'r', encoding='utf-8') as f:
             content = f.read()
         
-        # Simple variable replacement {{variable}}
+     # Simple variable replacement {{variable}}
         for key, value in context.items():
-            if value!='None':
-                content = content.replace('{{' + key + '}}', str(value))
-            else:
+            if str(value) == 'None':
                 content = content.replace('{{'+ key +'}}', '')
+            
+            else:
+                content = content.replace('{{' + key + '}}', str(value))
         
         self._set_headers()
         self.wfile.write(content.encode('utf-8'))
@@ -480,7 +481,7 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
                 return
             # For cv-content, use form data (flatten if multipart)
             form_data = post_data.get('form', post_data) if isinstance(post_data, dict) and 'form' in post_data else post_data
-            from handlers import get_user_dashboard_data, add_cv_content
+            from handlers import add_cv_content
             result =add_cv_content(session.get('user_id'), form_data)
             self._redirect('/user-dashboard')
 
@@ -501,7 +502,7 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
 
             self.send_response(200)
             self.send_header('Content-Type', 'application/pdf')
-            self.send_header('Content-Disposition', f'attachment; filename="cv_{session["user_id"]}.pdf"')
+            self.send_header('Content-Disposition', f'attachment; filename="cv_{session["user_id"]}.pdf"')  ### file name da cambiare (mettere tipo il nome dell'utente)
             self.end_headers()
             self.wfile.write(result['pdf_bytes'])
 ##########################################################################################

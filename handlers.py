@@ -120,8 +120,8 @@ def handle_update_profile(user_id, data):
     linkedin_url = data.get('linkedin_url', '').strip()
     
     # Validation
-    if not all([nome, cognome, email]):
-        return {'success': False, 'error': 'Nome, cognome e email sono obbligatori'}
+    if not all([nome, cognome, email, data_nascita]):
+        return {'success': False, 'error': 'Nome, cognome, email e data di nascita sono obbligatori'}
     
     if not validate_email(email):
         return {'success': False, 'error': 'Email non valida'}
@@ -160,6 +160,26 @@ def handle_update_profile(user_id, data):
     conn.close()
     
     return {'success': True, 'message': 'Profilo aggiornato con successo!'}
+
+def add_cv_content(user_id, data):
+    hobby = sanitize_input(data.get('summary', '').strip())
+    skills = sanitize_input(data.get('skills', '').strip())
+    languages = sanitize_input(data.get('languages', '').strip())
+    
+    # connessione al db
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    
+
+    cursor.execute(
+        'UPDATE cv_data SET hobby = %s, skills = %s, languages = %s WHERE user_id = %s',
+        (hobby, skills, languages, user_id)
+    )
+
+    conn.commit()
+    conn.close()
+
+    return {'success': True, 'message': 'Contenuto CV aggiornato con successo!'}
 
 
 def handle_add_experience(user_id, data):
@@ -255,7 +275,7 @@ def get_user_dashboard_data(user_id):
             user[key] = sanitize_input(user[key])
     
     for key in cv_data:
-        if isinstance(cv_data[key], str) and cv_data != 'None':
+        if isinstance(cv_data[key], str):
             cv_data[key] = sanitize_input(cv_data[key])
 
     # Flatten data for template
@@ -280,29 +300,6 @@ def get_user_dashboard_data(user_id):
     
     return context
 
-
-
-
-
-def add_cv_content(user_id, data):
-    hobby = sanitize_input(data.get('summary', '').strip())
-    skills = sanitize_input(data.get('skills', '').strip())
-    languages = sanitize_input(data.get('languages', '').strip())
-    
-    # connessione al db
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-    
-
-    cursor.execute(
-        'UPDATE cv_data SET hobby = %s, skills = %s, languages = %s WHERE id = %s',
-        (hobby, skills, languages, user_id)
-    )
-
-    conn.commit()
-    conn.close()
-
-    return {'success': True, 'message': 'Contenuto CV aggiornato con successo!'}
 
 
 
