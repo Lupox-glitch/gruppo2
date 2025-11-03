@@ -29,7 +29,6 @@ CREATE TABLE IF NOT EXISTS cv_data (
     citta VARCHAR(100),
     nazionalita VARCHAR(100),
     linkedin_url VARCHAR(255),
-    cv_file_path VARCHAR(255),
     hobby TEXT,
     skills TEXT,
     languages TEXT,
@@ -53,3 +52,13 @@ CREATE TABLE IF NOT EXISTS experiences (
     INDEX idx_tipo (tipo)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- tabella dei cv in relazione a user_id
+CREATE TABLE IF NOT EXISTS user_cvs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    cv_path_file VARCHAR(255) NOT NULL,
+    uploaded_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    INDEX idx_user_id (user_id),
+    INDEX idx_uploaded_at (uploaded_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

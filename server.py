@@ -4,14 +4,14 @@ CV Management System - Pure Python Server
 No frameworks, only standard library
 """
 
+
 import http.server
 import http.cookies
 import urllib.parse
 import json
-import os
 import mimetypes
 import secrets
-import hashlib
+import os
 import re
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -229,13 +229,28 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
         with open(file_path, 'rb') as f:
             self.wfile.write(f.read())
 
+
+
+
+
+
     ## AGGIUNTA: Gestione upload CV ##
     def _handle_upload_cv_form(self):
+
+        session=self._get_session()
+        
         content_type = self.headers.get('Content-Type', '')
         if 'boundary=' not in content_type:
             self._send_json({'success': False, 'error': 'Invalid Content-Type'}, 400)
             return
-
+        
+        if not session.get('user_id'):
+            self._send_json({'success': False, 'error': 'non autenticato'}, 400)
+            return
+       
+        
+        user_id = int(session['user_id'])  # solo dalla sessione
+        
         boundary = content_type.split('boundary=')[-1].encode()
         content_length = int(self.headers.get('Content-Length', 0))
         body = self.rfile.read(content_length)
@@ -260,9 +275,11 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
                 end = header_text.find('"', start)
                 filename = header_text[start:end]
                 file_data = data
+
+                
         # ✅ Controlla campi obbligatori
         if not user_id or not filename or not file_data:
-            self._send_json({'success': False, 'error': 'manca cartello o user_id'}, 400)
+            self._send_json({'success': False, 'error': 'manca file o user_id'}, 400)
             return
         # ✅ Controlla che sia un PDF
         if not filename.lower().endswith('.pdf'):
@@ -272,9 +289,6 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
         if len(file_data) > MAX_FILE_SIZE:
             self._send_json({'success': False, 'error': 'il file deve essere < 5 mb'}, 400)
             return
-
-
-
     # Rinomina sicura per evitare conflitti
 
         # Usa il nome originale del file caricato
@@ -282,8 +296,6 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
 
         # Pulisci il nome per evitare caratteri strani (sicurezza)
         safe_filename = re.sub(r'[^A-Za-z0-9._-]', '_', original_filename)
-
-
 
 
         # Percorso di salvataggio finale
@@ -306,7 +318,7 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
         relative_path = f"uploads/cv/{safe_filename}"
-        cursor.execute("INSERT INTO user_cvs (user_id, file_path) VALUES (%s, %s)", (user_id, relative_path))
+        cursor.execute("INSERT INTO user_cvs (user_id, cv_file_path) VALUES (%s, %s)", (user_id, relative_path))
         conn.commit()
         conn.close()
 
@@ -315,8 +327,7 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
 
 
         self._send_json({'success': True, 'message': 'CV caricato con successo!'})
-
-    ## AGGIUNTA: Gestione download CV ###
+   ## AGGIUNTA: Gestione download CV ###
     def _handle_download_cv(self, user_id):
         from database import get_cv_file
         file_name = get_cv_file(int(user_id))
@@ -326,9 +337,11 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
 
     # ✅ Usa percorso corretto
         if file_name.startswith("uploads/cv/"):
-            file_path = Path(file_name)
+            file_path = BASE_DIR / file_name
         else:
-            file_path = UPLOAD_DIR / file_name
+            file_path = Path(file_name)
+            if not file_path.is_absolute():
+                file_path = BASE_DIR / file_name
 
         if not file_path.exists():
             self._send_json({'success': False, 'error': 'File not found on server'}, 404)
@@ -346,7 +359,6 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
 
 
     """Gestisce l'eliminazione di un CV"""
-
     def _handle_delete_cv(self, cv_id, session):
     
         from database import get_cv_by_id, delete_cv
@@ -367,7 +379,7 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
             return
 
         # 🔧 Elimina file dal filesystem
-        file_path = Path(cv['file_path'])
+        file_path = Path(cv['cv_file_path'])
         if not file_path.is_absolute():
             file_path = Path.cwd() / file_path
 
@@ -381,6 +393,9 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
         delete_cv(int(cv_id))
 
         self._send_json({'success': True, 'message': 'CV eliminato con successo'})
+
+
+
 
 
     def do_GET(self):
@@ -502,6 +517,9 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
         elif path.startswith('/css/') or path.startswith('/js/') or path.startswith('/uploads/'):
             self._serve_static(path)
         
+
+
+########################### Gestione Download e Cancellazione CV########################################################
         elif path.startswith('/api/download-cv'):
             user_id = query.get('user_id')
             if not user_id:
@@ -526,6 +544,8 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
 
         else:
             self._send_error(404, "Page not found")
+########################################################################################################################
+    
     
     def do_POST(self):
         """Handle POST requests"""
@@ -546,7 +566,7 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
         
         # Import handlers
         from handlers import (
-            handle_login, handle_register, handle_upload_cv,handle_download_cv,
+            handle_login, handle_register,handle_download_cv,
             handle_update_profile, handle_add_experience, handle_delete_experience,
             handle_admin_delete_user
         )
@@ -674,6 +694,8 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
             if not session.get('user_id'):
                 self._send_json({'success': False, 'error': 'Non autenticato'}, 401)
                 return
+            
+            user_id = post_data.get('user_id')
 
             from handlers import handle_download_cv
             result = handle_download_cv(session['user_id'])

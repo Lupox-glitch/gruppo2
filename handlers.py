@@ -4,13 +4,11 @@ All functions use prepared statements for SQL injection prevention
 """
 
 import os
-import secrets
 from pathlib import Path
 from datetime import datetime
 from database import (
-    get_db_connection, hash_password, generate_salt,verify_password,
-    sanitize_input, validate_email, validate_password,
-    execute_query, execute_insert, execute_update
+    get_db_connection, hash_password, salt_generation,verify_password,
+    sanitize_input, validate_email, validate_password
 )
 
 UPLOAD_DIR = Path(__file__).parent / 'uploads' / 'cv'
@@ -242,6 +240,34 @@ def handle_delete_experience(user_id, experience_id):
     return {'success': True, 'message': 'Esperienza eliminata con successo!'}
 
 
+def _render_experiences(experiences, tipo):
+    """Render experiences list HTML"""
+    filtered = [exp for exp in experiences if exp.get('tipo') == tipo]
+    
+    if not filtered:
+        return '<p class="text-muted">Nessuna esperienza aggiunta ancora.</p>'
+    
+    html = '<div class="experiences-list">'
+    for exp in filtered:
+        is_current = exp.get('is_current', 0)
+        data_fine = exp.get('data_fine', '')
+        periodo = f"{exp.get('data_inizio', '')} - {'In corso' if is_current else data_fine}"
+        
+        html += f'''
+        <div class="experience-card">
+            <h4>{sanitize_input(exp.get('titolo', ''))}</h4>
+            <p class="company">{sanitize_input(exp.get('azienda_istituto', ''))}</p>
+            <p class="period">{periodo}</p>
+            <p class="description">{sanitize_input(exp.get('descrizione', ''))}</p>
+            <button onclick="deleteExperience({exp.get('id')})" class="btn btn-danger btn-sm">Elimina</button>
+        </div>
+        '''
+    
+    html += '</div>'
+    return html
+
+
+
 def get_user_dashboard_data(user_id):
     """Get all data for user dashboard"""
     conn = get_db_connection()
@@ -279,10 +305,10 @@ def get_user_dashboard_data(user_id):
 
     cv_list_html = '<ul style="list-style:none; padding-left:0;">'
     for cv in cv_files:
-        file_name = os.path.basename(cv['file_path'])
+        file_name = os.path.basename(cv['cv_file_path'])
         cv_list_html += f'''
             <li style="margin-bottom:6px;">
-                📄 <a href="/{cv["file_path"]}" target="_blank">{file_name}</a>
+                📄 <a href="/{cv["cv_file_path"]}" target="_blank">{file_name}</a>
                 <button class="delete-cv-btn"
                         data-cv-id="{cv["id"]}"
                         style="margin-left:10px;
@@ -335,61 +361,31 @@ def get_user_dashboard_data(user_id):
 
 
 
-
-
-def _render_experiences(experiences, tipo):
-    """Render experiences list HTML"""
-    filtered = [exp for exp in experiences if exp.get('tipo') == tipo]
-    
-    if not filtered:
-        return '<p class="text-muted">Nessuna esperienza aggiunta ancora.</p>'
-    
-    html = '<div class="experiences-list">'
-    for exp in filtered:
-        is_current = exp.get('is_current', 0)
-        data_fine = exp.get('data_fine', '')
-        periodo = f"{exp.get('data_inizio', '')} - {'In corso' if is_current else data_fine}"
-        
-        html += f'''
-        <div class="experience-card">
-            <h4>{sanitize_input(exp.get('titolo', ''))}</h4>
-            <p class="company">{sanitize_input(exp.get('azienda_istituto', ''))}</p>
-            <p class="period">{periodo}</p>
-            <p class="description">{sanitize_input(exp.get('descrizione', ''))}</p>
-            <button onclick="deleteExperience({exp.get('id')})" class="btn btn-danger btn-sm">Elimina</button>
-        </div>
-        '''
-    
-    html += '</div>'
-    return html
-
-
 def get_admin_dashboard_data():
-    """Get all data for admin dashboard"""
+    """ricava tutti i dati necessari per essere mostrati nell' admin dashboard"""
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    #cv.cv_file_path, cv.cv_uploaded_at, 
-    # Get all students with their data
+
     cursor.execute(
         """
         SELECT u.id, u.email, u.password_hash, u.salt, u.nome, u.cognome, u.role,
-               cv.telefono, cv.data_nascita, cv.indirizzo,
+               cv.telefono, cv.data_nascita, cv.indirizzo, cv.cv_file_path,
                COUNT(e.id) as total_experiences
         FROM users u
         LEFT JOIN cv_data cv ON u.id = cv.user_id
         LEFT JOIN experiences e ON u.id = e.user_id
         WHERE u.role = 'student'
         GROUP BY u.id, u.email, u.password_hash, u.salt, u.nome, u.cognome, u.role,
-                 cv.telefono, cv.data_nascita, cv.indirizzo
+                 cv.telefono, cv.data_nascita, cv.indirizzo, cv.cv_file_path
         """
     )
     students = cursor.fetchall()
     
-    # Get statistics
+    # query per ricavare le statistiche degli utenti 
     cursor.execute("SELECT COUNT(*) as total FROM users WHERE role = 'student'")
     total_students = cursor.fetchone()['total']
     
-    cursor.execute("SELECT COUNT(DISTINCT user_id) as total FROM cv_data ") #WHERE cv_file_path IS NOT NULL
+    cursor.execute("SELECT COUNT(DISTINCT user_id) as total FROM cv_data WHERE cv_file_path IS NOT NULL") 
     students_with_cv = cursor.fetchone()['total']
     
     cursor.execute("SELECT COUNT(*) as total FROM experiences WHERE tipo = 'lavoro'")
@@ -400,7 +396,7 @@ def get_admin_dashboard_data():
     
     conn.close()
     
-    # Render student rows
+    # crea le righe degli studenti 
     students_rows_html = _render_students_table(students)
     
     return {
@@ -470,10 +466,12 @@ def get_admin_view_student_data(student_id):
     experiences = [dict(row) for row in cursor.fetchall()]
     
     
-    
-        # Ottieni tutti i CV caricati
+
+######################################################################################################################## 
+    # Ottieni tutti i CV caricati
     cursor.execute("SELECT * FROM user_cvs WHERE user_id = %s ORDER BY uploaded_at DESC", (student_id,))
     cv_files = cursor.fetchall()
+
     conn.close()
 
     if cv_files:
@@ -491,7 +489,7 @@ def get_admin_view_student_data(student_id):
         cv_section_html += '</div>'
     else:
         cv_section_html = '<p class="text-muted">Nessun CV caricato.</p>'
-
+########################################################################################################################
     
     # Render work experiences
     work_exp = [exp for exp in experiences if exp.get('tipo') == 'lavoro']
@@ -549,53 +547,6 @@ def get_admin_view_student_data(student_id):
         'esperienze_lavorative': work_exp_html,
         'esperienze_formative': edu_exp_html
     }
-
-
-
-
-####################################### UPLOAD CV ##################################################################
-
-
-
-def handle_upload_cv(user_id, files):
-    """Permette di caricare più CV per utente e salva nel DB"""
-    if 'cv_file' not in files:
-        return {'success': False, 'error': 'Nessun file selezionato'}
-
-    file_data = files['cv_file']
-    filename = file_data.get('filename', '')
-    content = file_data.get('content', b'')
-
-    # Validazione base
-    if not filename.lower().endswith('.pdf'):
-        return {'success': False, 'error': 'Solo PDF consentiti'}
-    if len(content) > MAX_FILE_SIZE:
-        return {'success': False, 'error': 'Il file supera i 5MB'}
-
-    # Nome sicuro univoco
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    safe_name = f"cv_{user_id}_{timestamp}.pdf"
-    file_path = UPLOAD_DIR / safe_name
-    UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
-
-    with open(file_path, 'wb') as f:
-        f.write(content)
-
-    # Inserimento nel DB
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-    relative_path = f"uploads/cv/{safe_name}"
-    cursor.execute(
-        "INSERT INTO user_cvs (user_id, file_path) VALUES (%s, %s)",
-        (user_id, relative_path)
-    )
-    conn.commit()
-    conn.close()
-
-    return {'success': True, 'message': 'CV caricato con successo!'}
-
-
-####################################### fine UPLOAD CV ################################################################## 
 
 
 
@@ -688,104 +639,6 @@ def get_cv_data(user_id):
     
     finally:
         conn.close()
-
-def handle_edit_guided_cv(user_id, data, regenerate=True):
-    """Aggiorna i dati del CV guidato e opzionalmente rigenera il PDF"""
-    # Estraggo e sanitizzo input
-    nome = sanitize_input(data.get('nome', '').strip())
-    cognome = sanitize_input(data.get('cognome', '').strip())
-    email = data.get('email', '').strip()
-    telefono = sanitize_input(data.get('telefono', '').strip())
-    data_nascita = data.get('data_nascita', '').strip()
-    citta = sanitize_input(data.get('citta', '').strip())
-    indirizzo = sanitize_input(data.get('indirizzo', '').strip())
-    linkedin_url = data.get('linkedin_url', '').strip()
-
-    if not all([nome, cognome, email]):
-        return {'success': False, 'error': 'Nome, cognome e email sono obbligatori'}
-
-    if not validate_email(email):
-        return {'success': False, 'error': 'Email non valida'}
-
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-
-    try:
-        # Aggiorno tabella users
-        cursor.execute(
-            'UPDATE users SET nome = %s, cognome = %s, email = %s WHERE id = %s',
-            (nome, cognome, email, user_id)
-        )
-
-        # Assicuro che esista la riga in cv_data
-        cursor.execute('SELECT id, cv_file_path FROM cv_data WHERE user_id = %s', (user_id,))
-        cv_row = cursor.fetchone()
-        if cv_row:
-            cursor.execute(
-                'UPDATE cv_data SET telefono = %s, data_nascita = %s, citta = %s, indirizzo = %s, linkedin_url = %s WHERE user_id = %s',
-                (telefono, data_nascita, citta, indirizzo, linkedin_url, user_id)
-            )
-            old_cv_path = cv_row.get('cv_file_path')
-        else:
-            cursor.execute(
-                'INSERT INTO cv_data (user_id, telefono, data_nascita, citta, indirizzo, linkedin_url) VALUES (%s, %s, %s, %s, %s, %s)',
-                (user_id, telefono, data_nascita, citta, indirizzo, linkedin_url)
-            )
-            old_cv_path = None
-
-        # Se richiesto rigenero il PDF usando esperienze correnti
-        pdf_relative_path = None
-        if regenerate:
-            cursor.execute('SELECT * FROM experiences WHERE user_id = %s ORDER BY data_inizio DESC', (user_id,))
-            experiences = cursor.fetchall() or []
-
-            # Preparo dati personali per il generatore
-            personal_data = {
-                'nome': nome,
-                'cognome': cognome,
-                'email': email,
-                'telefono': telefono,
-                'data_nascita': data_nascita,
-                'citta': citta,
-                'indirizzo': indirizzo,
-                'linkedin_url': linkedin_url
-            }
-
-            from pdf_generator import generate_cv_pdf
-            timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-            pdf_filename = f'cv_generated_{user_id}_{timestamp}.pdf'
-            UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
-            pdf_path = UPLOAD_DIR / pdf_filename
-
-            # Genero PDF
-            generate_cv_pdf(pdf_path, personal_data, experiences)
-
-            # Rimuovo vecchio file se presente
-            if old_cv_path:
-                old_fs_path = Path(__file__).parent / old_cv_path
-                if old_fs_path.exists():
-                    try:
-                        old_fs_path.unlink()
-                    except Exception:
-                        pass
-
-            pdf_relative_path = f'uploads/cv/{pdf_filename}'
-            cursor.execute(
-                'UPDATE cv_data SET cv_file_path = %s WHERE user_id = %s',
-                (pdf_relative_path, user_id)
-            )
-
-        conn.commit()
-        return {'success': True, 'message': 'CV aggiornato con successo!', 'pdf_path': pdf_relative_path}
-    except Exception as e:
-        conn.rollback()
-        return {'success': False, 'error': f'Errore durante l\'aggiornamento: {str(e)}'}
-    finally:
-        conn.close()
-
-
-
-
 
 
 

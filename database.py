@@ -18,11 +18,11 @@ from datetime import datetime
 # MySQL configuration from environment
 import mysql.connector
 
-MYSQL_HOST = "localhost"
-MYSQL_PORT = 3306
-MYSQL_USER = "root"
-MYSQL_PASSWORD = "root"
-MYSQL_DB = "cv_management"
+MYSQL_HOST = os.getenv('MYSQL_HOST', 'localhost')
+MYSQL_PORT = int(os.getenv('MYSQL_PORT', '3306'))
+MYSQL_USER = os.getenv('MYSQL_USER', 'root')                    # dipende da come lo setti nel sistema  
+MYSQL_PASSWORD = os.getenv('MYSQL_PASSWORD', '110605')          # dipende da come lo setti nel sistema 
+MYSQL_DB = os.getenv('MYSQL_DB', 'cv_management')
 
 def get_db_connection():
     conn = mysql.connector.connect(
@@ -35,8 +35,8 @@ def get_db_connection():
     )
     return conn
         
-
-def generate_salt(length=16):    # genera salt randomico 
+# genera salt randomico
+def salt_generation (length=16):     
     return os.urandom(length).hex()
 
 
@@ -52,8 +52,7 @@ def verify_password(password, hashed , salt):
 
 
 def create_tables():
-    print("→ Creazione o verifica tabelle MySQL...")
-
+    """Create database tables in MySQL (if they don't exist)."""
     conn = get_db_connection()
     cursor = conn.cursor()
 
@@ -83,7 +82,6 @@ def create_tables():
             citta VARCHAR(100),
             nazionalita VARCHAR(100),
             linkedin_url VARCHAR(255),
-            cv_file_path VARCHAR(255),
             hobby TEXT,
             skills TEXT,
             languages TEXT,
@@ -110,14 +108,16 @@ def create_tables():
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     """)
 
-    # --- Tabella file PDF caricati ---
+    # --- tabella lista cv ---
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS user_cvs (
             id INT AUTO_INCREMENT PRIMARY KEY,
             user_id INT NOT NULL,
-            file_path VARCHAR(255) NOT NULL,
-            uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            cv_file_path VARCHAR(255),
+            uploaded_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            INDEX idx_user_id (user_id),
+            INDEX idx_uploaded_at (uploaded_at)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
     """)
 
@@ -139,22 +139,29 @@ def create_default_users():
         conn.close()
         return
 
-    # Inserisce due utenti di default: admin e studente
-    default_users = [
-        ("admin@example.com", "Admin", "User", "admin", "admin123"),
-        ("studente@example.com", "Mario", "Rossi", "student", "studente123")
-    ]
-
-    for email, nome, cognome, ruolo, password in default_users:
-        salt = generate_salt()
-        password_hash = hash_password(password, salt)
-        cursor.execute(
-            "INSERT INTO users (email, nome, cognome, role, password_hash, salt) VALUES (%s, %s, %s, %s, %s, %s)",
-            (email, nome, cognome, ruolo, password_hash, salt)
-        )
-
+        # Admin user
+    salt=salt_generation()
+    cursor.execute(
+        'INSERT INTO users (email, password_hash,salt, nome, cognome, role) VALUES (%s, %s, %s, %s, %s, %s)',
+        ('admin@cvmanagement.it', hash_password('Admin123!',salt), salt, 'Admin', 'Sistema', 'admin')
+    )
+    
+    # Student user
+    salt=salt_generation()
+    cursor.execute(
+        'INSERT INTO users (email, password_hash, salt, nome, cognome, role) VALUES (%s, %s, %s, %s, %s, %s)',
+        ('student@test.it', hash_password('Student123!',salt), salt, 'Mario', 'Rossi', 'student')
+    )
+    
+    student_id = cursor.lastrowid
+    
+    # Create cv_data entry for student
+    cursor.execute(
+        'INSERT INTO cv_data (user_id, telefono, citta) VALUES (%s, %s, %s)',
+        (student_id, '+39 123 456 7890', 'Milano')
+    )
+    
     conn.commit()
-    cursor.close()
     conn.close()
     print("✓ Default users created")
 
@@ -174,33 +181,6 @@ def execute_query(query, params=None):
     return result
 
 
-def execute_insert(query, params=None):
-    """Execute an INSERT query and return last insert ID"""
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-    if params:
-        cursor.execute(query, params)
-    else:
-        cursor.execute(query)
-    last_id = cursor.lastrowid
-    conn.commit()
-    conn.close()
-    return last_id
-
-
-def execute_update(query, params=None):
-    """Execute an UPDATE/DELETE query"""
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-    if params:
-        cursor.execute(query, params)
-    else:
-        cursor.execute(query)
-    rows_affected = cursor.rowcount
-    conn.commit()
-    conn.close()
-    return rows_affected
-
 
 # Security functions
 def sanitize_input(text):
@@ -213,7 +193,7 @@ def sanitize_input(text):
         '>': '&gt;',
         '"': '&quot;',
         "'": '&#x27;',
-        '/': '&#x2F;',
+        './': '&#x2F;',
         ';': '&#59;',
         ':': '&#58;'
     }
@@ -262,12 +242,14 @@ def delete_cv(cv_id):
     conn.commit()
     cursor.close()
     conn.close()
+
+
 def get_cv_file(user_id):
     """Restituisce l'ultimo CV caricato da un utente (user_cvs)"""
     conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute(
-        "SELECT file_path FROM user_cvs WHERE user_id = %s ORDER BY uploaded_at DESC LIMIT 1",
+        "SELECT cv_file_path FROM user_cvs WHERE user_id = %s ORDER BY uploaded_at DESC LIMIT 1",
         (user_id,)
     )
     row = cursor.fetchone()
