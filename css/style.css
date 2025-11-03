@@ -1697,3 +1697,11 @@ tbody td {
   color: #e5e7eb;
   box-shadow: 0 4px 12px rgba(37,99,235,.3);
 }
+#cvLinkContainer a {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 600;
+}
+#cvLinkContainer a:hover {
+  text-decoration: underline;
+}

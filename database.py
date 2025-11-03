@@ -14,32 +14,29 @@ import os
 import hashlib
 from datetime import datetime
 
-import mysql.connector
-
 
 # MySQL configuration from environment
-MYSQL_HOST = os.getenv('MYSQL_HOST', 'localhost')
-MYSQL_PORT = int(os.getenv('MYSQL_PORT', '3306'))
-MYSQL_USER = os.getenv('MYSQL_USER', 'root')                    # dipende da come lo setti nel sistema  
-MYSQL_PASSWORD = os.getenv('MYSQL_PASSWORD', '110605') # dipende da come lo setti nel sistema 
-MYSQL_DB = os.getenv('MYSQL_DB', 'cv_management')
+import mysql.connector
 
-
+MYSQL_HOST = "localhost"
+MYSQL_PORT = 3306
+MYSQL_USER = "root"
+MYSQL_PASSWORD = "root"
+MYSQL_DB = "cv_management"
 
 def get_db_connection():
-    """Get MySQL database connection with dict cursor support."""
     conn = mysql.connector.connect(
         host=MYSQL_HOST,
-        port=MYSQL_PORT,
         user=MYSQL_USER,
         password=MYSQL_PASSWORD,
         database=MYSQL_DB,
-        autocommit=False,
+        port=MYSQL_PORT,
+        autocommit=False
     )
     return conn
         
 
-def salt_generation(length=16):    # genera salt randomico 
+def generate_salt(length=16):    # genera salt randomico 
     return os.urandom(length).hex()
 
 
@@ -55,16 +52,13 @@ def verify_password(password, hashed , salt):
 
 
 def create_tables():
-    """Create database tables in MySQL (if they don't exist)."""
+    print("→ Creazione o verifica tabelle MySQL...")
+
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # Ensure UTF8MB4 for connection
-    cursor.execute("SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci")
-
-    # Users table
-    cursor.execute(
-        """
+    # --- Tabella utenti ---
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS users (
             id INT AUTO_INCREMENT PRIMARY KEY,
             email VARCHAR(255) NOT NULL UNIQUE,
@@ -75,13 +69,11 @@ def create_tables():
             role ENUM('student','admin') DEFAULT 'student',
             INDEX idx_email (email),
             INDEX idx_role (role)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-        """
-    )
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    """)
 
-    # CV Data table
-    cursor.execute(
-        """
+    # --- Tabella dati del CV ---
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS cv_data (
             id INT AUTO_INCREMENT PRIMARY KEY,
             user_id INT NOT NULL,
@@ -97,14 +89,11 @@ def create_tables():
             languages TEXT,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
             INDEX idx_user_id (user_id)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-        """
-    )
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    """)
 
-
-    # Experiences table
-    cursor.execute(
-        """
+    # --- Tabella esperienze ---
+    cursor.execute("""
         CREATE TABLE IF NOT EXISTS experiences (
             id INT AUTO_INCREMENT PRIMARY KEY,
             user_id INT NOT NULL,
@@ -118,50 +107,57 @@ def create_tables():
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
             INDEX idx_user_id (user_id),
             INDEX idx_tipo (tipo)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-        """
-    )
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    """)
+
+    # --- Tabella file PDF caricati ---
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS user_cvs (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NOT NULL,
+            file_path VARCHAR(255) NOT NULL,
+            uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    """)
 
     conn.commit()
+    cursor.close()
     conn.close()
+
 
 
 def create_default_users():
-    """Create default admin and student users"""
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-    
-    # Check if users already exist
-    cursor.execute('SELECT COUNT(*) as count FROM users')
-    if cursor.fetchone()['count'] > 0:
+    cursor = conn.cursor()
+
+    # Controlla se ci sono già utenti
+    cursor.execute("SELECT COUNT(*) FROM users")
+    count = cursor.fetchone()[0]
+    if count > 0:
+        cursor.close()
         conn.close()
-        return  # Users already exist
-    
-    # Admin user
-    salt=salt_generation()
-    cursor.execute(
-        'INSERT INTO users (email, password_hash,salt, nome, cognome, role) VALUES (%s, %s, %s, %s, %s, %s)',
-        ('admin@cvmanagement.it', hash_password('admin123',salt), salt, 'Admin', 'Sistema', 'admin')
-    )
-    
-    # Student user
-    salt=salt_generation()
-    cursor.execute(
-        'INSERT INTO users (email, password_hash, salt, nome, cognome, role) VALUES (%s, %s, %s, %s, %s, %s)',
-        ('student@test.it', hash_password('student123',salt), salt, 'Mario', 'Rossi', 'student')
-    )
-    
-    student_id = cursor.lastrowid
-    
-    # Create cv_data entry for student
-    cursor.execute(
-        'INSERT INTO cv_data (user_id, telefono, citta) VALUES (%s, %s, %s)',
-        (student_id, '+39 123 456 7890', 'Milano')
-    )
-    
+        return
+
+    # Inserisce due utenti di default: admin e studente
+    default_users = [
+        ("admin@example.com", "Admin", "User", "admin", "admin123"),
+        ("studente@example.com", "Mario", "Rossi", "student", "studente123")
+    ]
+
+    for email, nome, cognome, ruolo, password in default_users:
+        salt = generate_salt()
+        password_hash = hash_password(password, salt)
+        cursor.execute(
+            "INSERT INTO users (email, nome, cognome, role, password_hash, salt) VALUES (%s, %s, %s, %s, %s, %s)",
+            (email, nome, cognome, ruolo, password_hash, salt)
+        )
+
     conn.commit()
+    cursor.close()
     conn.close()
     print("✓ Default users created")
+
 
 
 # Query functions with prepared statements
@@ -244,3 +240,38 @@ def validate_password(password):
     if not any(c.isdigit() for c in password):
         return False, "La password deve contenere almeno un numero"
     return True, ""
+
+
+
+# === Gestione eliminazione CV ===
+def get_cv_by_id(cv_id):
+    """Restituisce un singolo record CV"""
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM user_cvs WHERE id = %s", (cv_id,))
+    row = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return row
+
+def delete_cv(cv_id):
+    """Elimina un CV dal database"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM user_cvs WHERE id = %s", (cv_id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+def get_cv_file(user_id):
+    """Restituisce l'ultimo CV caricato da un utente (user_cvs)"""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "SELECT file_path FROM user_cvs WHERE user_id = %s ORDER BY uploaded_at DESC LIMIT 1",
+        (user_id,)
+    )
+    row = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return row[0] if row else None
+

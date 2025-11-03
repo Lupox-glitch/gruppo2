@@ -78,16 +78,23 @@
                 </div>
             </section>
             
-            <!-- Sezione Curriculum Vitae -->
+            <!-- Curriculum Vitae -->
             <section class="sezione-dashboard">
                 <div class="section-header">
                     <h2>Curriculum Vitae</h2>
                 </div>
-                
+
                 <div class="scheda">
                     {{cv_section}}
+                    <div style="margin-top:10px;">
+                        <a href="/api/download-cv?user_id={{id}}" class="bottone-primario" target="_blank">
+                            📎 Visualizza / Scarica CV
+                        </a>
+                    </div>
                 </div>
             </section>
+
+
             
             <!-- Sezione Esperienze Lavorative -->
             <section class="sezione-dashboard">

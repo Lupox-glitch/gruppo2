@@ -8,7 +8,7 @@ import secrets
 from pathlib import Path
 from datetime import datetime
 from database import (
-    get_db_connection, hash_password, salt_generation,verify_password,
+    get_db_connection, hash_password, generate_salt,verify_password,
     sanitize_input, validate_email, validate_password,
     execute_query, execute_insert, execute_update
 )
@@ -249,6 +249,36 @@ def get_user_dashboard_data(user_id):
 
     conn.close()
     
+
+    # Recupera tutti i CV caricati dall’utente
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("SELECT * FROM user_cvs WHERE user_id = %s ORDER BY uploaded_at DESC", (user_id,))
+    cv_files = cursor.fetchall()
+    conn.close()
+
+    cv_list_html = '<ul style="list-style:none; padding-left:0;">'
+    for cv in cv_files:
+        file_name = os.path.basename(cv['file_path'])
+        cv_list_html += f'''
+            <li style="margin-bottom:6px;">
+                📄 <a href="/{cv["file_path"]}" target="_blank">{file_name}</a>
+                <button class="delete-cv-btn"
+                        data-cv-id="{cv["id"]}"
+                        style="margin-left:10px;
+                                background-color:#c0392b;
+                                color:#fff;
+                                border:none;
+                                border-radius:4px;
+                                padding:3px 8px;
+                                cursor:pointer;">
+                    🗑️ Elimina
+                </button>
+            </li>
+        '''
+    cv_list_html += '</ul>'
+
+
     # Sanitize output
     for key in user:
         if isinstance(user[key], str):
@@ -275,7 +305,10 @@ def get_user_dashboard_data(user_id):
         'cv_skills': cv_data.get('skills', ''),
         'cv_languages': cv_data.get('languages', ''),
         'esperienze_lavorative': _render_experiences(experiences, 'lavoro'),
-        'esperienze_formative': _render_experiences(experiences, 'formazione')
+        'esperienze_formative': _render_experiences(experiences, 'formazione'),
+        'user_id': user_id,
+        'user_cv_list': cv_list_html
+
     }
     
     return context
@@ -439,21 +472,29 @@ def get_admin_view_student_data(student_id):
     )
     experiences = [dict(row) for row in cursor.fetchall()]
     
-    conn.close()
     
-    # Render CV section
-    cv_path = cv_data.get('cv_file_path', '')
-    if cv_path:
-        cv_section_html = f'''
-        <div class="alert alert-success">
-            <strong>✓ CV caricato:</strong> {cv_path.split('/')[-1]}
-            <br>
-            <a href="/{cv_path}" class="btn btn-secondary btn-sm" target="_blank">Visualizza CV</a>
-            <a href="/{cv_path}" class="btn btn-primary btn-sm" download>Scarica CV</a>
-        </div>
-        '''
+    
+        # Ottieni tutti i CV caricati
+    cursor.execute("SELECT * FROM user_cvs WHERE user_id = %s ORDER BY uploaded_at DESC", (student_id,))
+    cv_files = cursor.fetchall()
+    conn.close()
+
+    if cv_files:
+        cv_section_html = '<div class="cv-list">'
+        for cv in cv_files:
+            cv_path = cv['file_path']
+            file_name = os.path.basename(cv_path)
+            cv_section_html += f'''
+            <div class="cv-item">
+                <p>📄 {file_name} <small>({cv['uploaded_at']})</small></p>
+                <a href="/{cv_path}" target="_blank" class="btn btn-secondary btn-sm">Visualizza</a>
+                <a href="/{cv_path}" download class="btn btn-primary btn-sm">Scarica</a>
+            </div>
+            '''
+        cv_section_html += '</div>'
     else:
-        cv_section_html = '<p class="text-muted">Nessun CV caricato ancora.</p>'
+        cv_section_html = '<p class="text-muted">Nessun CV caricato.</p>'
+
     
     # Render work experiences
     work_exp = [exp for exp in experiences if exp.get('tipo') == 'lavoro']
@@ -520,61 +561,42 @@ def get_admin_view_student_data(student_id):
 
 
 def handle_upload_cv(user_id, files):
-    """Handle CV file upload with validation"""
+    """Permette di caricare più CV per utente e salva nel DB"""
     if 'cv_file' not in files:
         return {'success': False, 'error': 'Nessun file selezionato'}
-    
+
     file_data = files['cv_file']
     filename = file_data.get('filename', '')
     content = file_data.get('content', b'')
-    
-    # Validate file
+
+    # Validazione base
     if not filename.lower().endswith('.pdf'):
-        return {'success': False, 'error': 'Solo file PDF sono consentiti'}
-    
+        return {'success': False, 'error': 'Solo PDF consentiti'}
     if len(content) > MAX_FILE_SIZE:
-        return {'success': False, 'error': 'Il file è troppo grande (max 5MB)'}
-    
-    # Check PDF signature (basic validation)
-    if not content.startswith(b'%PDF'):
-        return {'success': False, 'error': 'File non valido'}
-    
-    # Generate secure filename
-    timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-    secure_filename = f'cv_{user_id}_{timestamp}.pdf'
-    file_path = UPLOAD_DIR / secure_filename
-    
-    # Ensure upload directory exists
+        return {'success': False, 'error': 'Il file supera i 5MB'}
+
+    # Nome sicuro univoco
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    safe_name = f"cv_{user_id}_{timestamp}.pdf"
+    file_path = UPLOAD_DIR / safe_name
     UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
-    
-    # Save file
+
     with open(file_path, 'wb') as f:
         f.write(content)
-    
-    # Update database (prepared statement)
+
+    # Inserimento nel DB
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
-    
-    # Get old CV path to delete it
-    cursor.execute('SELECT cv_file_path FROM cv_data WHERE user_id = %s', (user_id,))
-    old_cv = cursor.fetchone()
-    
-    if old_cv and old_cv['cv_file_path']:
-        old_path = Path(__file__).parent / old_cv['cv_file_path']
-        if old_path.exists():
-            old_path.unlink()
-    
-    # Update database
-    relative_path = f'uploads/cv/{secure_filename}'
+    relative_path = f"uploads/cv/{safe_name}"
     cursor.execute(
-        'UPDATE cv_data SET cv_file_path = %s, cv_uploaded_at = CURRENT_TIMESTAMP WHERE user_id = %s',
-        (relative_path, user_id)
+        "INSERT INTO user_cvs (user_id, file_path) VALUES (%s, %s)",
+        (user_id, relative_path)
     )
-    
     conn.commit()
     conn.close()
-    
+
     return {'success': True, 'message': 'CV caricato con successo!'}
+
 
 ####################################### fine UPLOAD CV ################################################################## 
 

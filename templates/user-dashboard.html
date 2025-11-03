@@ -145,23 +145,45 @@
                 </div>
             </section>
             
-            <!-- Caricamento CV (Metodo Precedente) -->
+
+
+            <!-- ==========================
+     AGGIORNAMENTO: Caricamento CV PDF
+     ========================== -->
             <section class="sezione-dashboard">
                 <div class="section-header">
-                    <h2>Carica CV Esistente</h2>
+                    <h2>📄 Carica o Visualizza il tuo CV</h2>
                 </div>
-                
+    
                 <div class="scheda">
-                    <p class="testo-secondario mb-2">Se hai già un CV in PDF, puoi caricarlo direttamente qui:</p>
+                    <p class="testo-secondario mb-2">Se hai già un CV in PDF, puoi caricarlo o visualizzarlo direttamente qui:</p>
+        
                     <form method="POST" action="/api/upload-cv" enctype="multipart/form-data" id="formCaricaCV">
+                        <input type="hidden" name="user_id" value="{{user_id}}">
+            
                         <div class="gruppo-form">
                             <label for="file_cv">Seleziona file PDF (max 5MB):</label>
-                            <input type="file" id="file_cv" name="cv_file" accept=".pdf" required>
+                            <input type="file" id="file_cv" name="cv_file" accept="application/pdf" required>
                         </div>
                         <button type="submit" class="bottone-primario">Carica CV</button>
                     </form>
+                    
+                    <!-- Lista dei CV caricati -->
+                    <h3 style="margin-top: 20px;">I tuoi CV caricati</h3>
+                    <div id="cvListContainer">{{user_cv_list}}</div>
+        
+                    <!-- Messaggio di stato -->
+                    <p id="uploadStatus" style="margin-top:10px;color:#555;"></p>
+
+                    <!-- Link per visualizzare/scaricare CV -->
+                    <div id="cvLinkContainer" style="display:none;margin-top:10px;">
+                        <a id="viewCvLink" href="#" target="_blank">📎 Visualizza / Scarica CV</a>
+                    </div>
                 </div>
             </section>
+
+
+
             
             <!-- Sezione Esperienze Lavorative -->
             <section class="sezione-dashboard">
@@ -284,6 +306,84 @@
             }
         }
     </script>
+
+
+    <script>
+        
+/* ==========================
+   AGGIUNTA: Gestione Upload CV
+   ========================== */
+document.getElementById('formCaricaCV').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const form = e.target;
+    const fileInput = form.querySelector('[name=cv_file]');
+    const statusEl = document.getElementById('uploadStatus');
+    const userId = form.querySelector('[name=user_id]').value || localStorage.getItem('user_id') || 1;
+
+    if (!fileInput.files.length) {
+        statusEl.textContent = "❗ Seleziona un file PDF.";
+        return;
+    }
+
+    const file = fileInput.files[0];
+    if (file.type !== "application/pdf") {
+        statusEl.textContent = "❌ Solo file PDF sono permessi.";
+        return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+        statusEl.textContent = "❌ Il file supera 5 MB.";
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('cv_file', file);
+    formData.append('user_id', userId);
+
+    statusEl.textContent = "⏳ Caricamento in corso...";
+    try {
+        const response = await fetch('/api/upload-cv', { method: 'POST', body: formData });
+        const result = await response.json();
+        if (response.ok && result.success) {
+            statusEl.textContent = "✅ " + (result.message || "CV caricato con successo!");
+            document.getElementById('cvLinkContainer').style.display = 'block';
+            document.getElementById('viewCvLink').href = `/api/download-cv?user_id=${userId}`;
+        } else {
+            statusEl.textContent = "❌ Errore: " + (result.error || JSON.stringify(result));
+        }
+
+    } catch (err) {
+        statusEl.textContent = "❌ Errore di rete o server.";
+    }
+});
+</script>
+    <!-- Gestione eliminazione CV -->
+    <script>
+    document.addEventListener('click', function (event) {
+        if (event.target.classList.contains('delete-cv-btn')) {
+            event.preventDefault();
+
+            const cvId = event.target.getAttribute('data-cv-id');
+            if (!cvId) return;
+
+            const conferma = confirm('Sei sicuro di voler eliminare questo CV?');
+            if (!conferma) return;
+
+            fetch(`/api/delete-cv?cv_id=${cvId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('CV eliminato con successo!');
+                        // Rimuove il CV dalla lista
+                        event.target.closest('li').remove();
+                    } else {
+                        alert(data.error || 'Errore durante l\'eliminazione del CV.');
+                    }
+                })
+                .catch(() => alert('Errore di connessione al server.'));
+        }
+    });
+    </script>
+
     <script src="/js/validation.js"></script>
 </body>
 </html>
