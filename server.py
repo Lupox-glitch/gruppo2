@@ -324,17 +324,26 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
             self._send_json({'success': False, 'error': 'CV not found'}, 404)
             return
 
-        file_path = UPLOAD_DIR / file_name
+    # ✅ Usa percorso corretto
+        if file_name.startswith("uploads/cv/"):
+            file_path = Path(file_name)
+        else:
+            file_path = UPLOAD_DIR / file_name
+
         if not file_path.exists():
             self._send_json({'success': False, 'error': 'File not found on server'}, 404)
             return
 
+    # ✅ Imposta nome file corretto
+        download_name = os.path.basename(file_path)
+
         self.send_response(200)
         self.send_header('Content-Type', 'application/pdf')
-        self.send_header('Content-Disposition', f'inline; filename="{file_name}"')
+        self.send_header('Content-Disposition', f'inline; filename="{download_name}"')
         self.end_headers()
         with open(file_path, 'rb') as f:
             self.wfile.write(f.read())
+
 
     """Gestisce l'eliminazione di un CV"""
 
