@@ -1,7 +1,3 @@
-/* ============================================
-   CV Management System - Main Stylesheet
-   ============================================ */
-
 :root {
     /* Color Palette */
     --primary: #2563eb;
@@ -37,9 +33,7 @@
     --radius-xl: 1rem;
 }
 
-/* ============================================
-   Global Styles
-   ============================================ */
+    /* Stile globale*/
 
 * {
     margin: 0;
@@ -62,9 +56,6 @@ body {
     min-height: 100vh;
 }
 
-/* ============================================
-   Typography
-   ============================================ */
 
 h1, h2, h3, h4, h5, h6 {
     font-weight: 700;
@@ -94,9 +85,7 @@ a:hover {
     color: var(--primary-dark);
 }
 
-/* ============================================
-   Layout - Login/Register Pages
-   ============================================ */
+    /* Pagine login e registrazione */
 
 .auth-container {
     display: flex;
@@ -143,9 +132,7 @@ a:hover {
     font-size: 0.875rem;
 }
 
-/* ============================================
-   Dashboard Layout / Layout Dashboard
-   ============================================ */
+    /* Layout dashboard */
 
 .dashboard-wrapper,
 .contenitore-dashboard {
@@ -153,7 +140,7 @@ a:hover {
     min-height: 100vh;
 }
 
-/* Sidebar / Barra Laterale */
+/* Barra Laterale */
 .sidebar,
 .barra-laterale {
     width: 260px;
@@ -261,7 +248,7 @@ a:hover {
     border-top: 1px solid var(--dark-light);
 }
 
-/* Main Content / Contenuto Principale */
+/* Contenuto Principale */
 .main-content,
 .contenuto-principale {
     flex: 1;
@@ -291,9 +278,7 @@ a:hover {
     margin-bottom: var(--spacing-lg);
 }
 
-/* ============================================
-   Forms / Moduli
-   ============================================ */
+    /* Moduli */
 
 .form-group,
 .gruppo-form {
@@ -349,7 +334,6 @@ textarea.controllo-form {
     resize: vertical;
 }
 
-/* Password strength indicator - styles applied via JS if needed */
 .password-strength, .validazione-password { display: block; }
 .password-confirm, .conferma-password { display: block; }
 
@@ -425,9 +409,7 @@ textarea.controllo-form {
     color: var(--text-muted);
 }
 
-/* ============================================
-   Buttons / Bottoni
-   ============================================ */
+    /* Bottoni */
 
 .btn,
 .bottone {
@@ -586,9 +568,7 @@ textarea.controllo-form {
     font-size: 0.875rem;
 }
 
-/* ============================================
-   Cards / Schede
-   ============================================ */
+    /* Schede */
 
 .card,
 .scheda {
@@ -630,9 +610,7 @@ textarea.controllo-form {
     gap: var(--spacing-sm);
 }
 
-/* ============================================
-   Tables / Tabelle
-   ============================================ */
+    /* Tabelle */
 
 .table-wrapper,
 .contenitore-tabella {
@@ -677,9 +655,7 @@ tbody td {
     gap: var(--spacing-xs);
 }
 
-/* ============================================
-   Badges & Status / Distintivi e Stato
-   ============================================ */
+    /* Stato */
 
 .badge,
 .distintivo,
@@ -723,9 +699,7 @@ tbody td {
     color: var(--danger);
 }
 
-/* ============================================
-   Alerts
-   ============================================ */
+    /* Avvisi */
 
 .alert,
 .avviso {
@@ -765,9 +739,7 @@ tbody td {
     border-left: 4px solid var(--primary);
 }
 
-/* ============================================
-   Lists
-   ============================================ */
+    /* Liste */
 
 .list {
     list-style: none;
@@ -809,9 +781,7 @@ tbody td {
     margin-top: var(--spacing-xs);
 }
 
-/* ============================================
-   Grid System / Sistema Griglia
-   ============================================ */
+    /* Griglia */
 
 .grid,
 .griglia {
@@ -833,9 +803,7 @@ tbody td {
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
 }
 
-/* ============================================
-   Stats Cards / Schede Statistiche
-   ============================================ */
+    /* Statistiche */
 
 .stats-grid,
 .griglia-statistiche,
@@ -899,9 +867,7 @@ tbody td {
     flex-direction: column;
 }
 
-/* ============================================
-   Empty States
-   ============================================ */
+    /* Spazi vuoti*/
 
 .empty-state {
     text-align: center;
@@ -923,9 +889,7 @@ tbody td {
     margin-bottom: var(--spacing-lg);
 }
 
-/* ============================================
-   Utilities
-   ============================================ */
+    /* Varie cose */
 
 .text-center,
 .centra-testo,
@@ -987,9 +951,7 @@ tbody td {
 .gap-2 { gap: var(--spacing-sm); }
 .gap-3 { gap: var(--spacing-md); }
 
-/* ============================================
-   Responsive Design
-   ============================================ */
+    /* Un po piu responsivo */
 
 @media (max-width: 768px) {
     .sidebar {
@@ -1039,9 +1001,7 @@ tbody td {
     }
 }
 
-/* ============================================
-   Print Styles
-   ============================================ */
+    /* Stili*/
 
 @media print {
     .sidebar,
@@ -1060,9 +1020,7 @@ tbody td {
     }
 }
 
-/* ============================================
-   Landing - Dark Theme / Tema Scuro
-   ============================================ */
+    /* Tema Scuro */
 
 .landing-dark,
 .sfondo-scuro,
@@ -1072,7 +1030,7 @@ tbody td {
     color: var(--white);
 }
 
-/* Improve contrast of headings and buttons on dark backgrounds */
+    /* Contrasti */
 .landing-dark h1,
 .landing-dark h2,
 .landing-dark h3,
@@ -1092,7 +1050,6 @@ tbody td {
 .pagina-scura h5,
 .pagina-scura h6 { color: #f3f4f6; }
 
-/* Make form labels on dark pages match heading color */
 .landing-dark .form-group label,
 .landing-dark .gruppo-form label,
 .sfondo-scuro .form-group label,
@@ -1156,7 +1113,7 @@ tbody td {
     margin-bottom: var(--spacing-lg);
 }
 
-/* Self-contained dark card with hover lift - combines scheda-scura + sollevamento-hover */
+    /* Scheda ed effettini */
 .carta-scura {
     background: #111827;
     color: #e5e7eb;
@@ -1190,7 +1147,7 @@ tbody td {
     left: 100%;
 }
 
-/* Self-contained interactive dark card - combines scheda-scura + sollevamento-hover + bottone-blocco */
+    /* Scheda ed effettini 2 */
 .carta-interattiva {
     background: #111827;
     color: #e5e7eb;
@@ -1227,7 +1184,7 @@ tbody td {
     left: 100%;
 }
 
-/* Self-contained dark section - combines scheda-scura + sezione */
+    /* Scheda ed effettini 3 */
 .sezione-scura {
     background: #111827;
     color: #e5e7eb;
@@ -1256,7 +1213,7 @@ tbody td {
     left: 100%;
 }
 
-/* Hero section with gradient background - combines scheda + scheda-scura + banner-scuro + sezione */
+    /* Gradiente */
 .sezione-hero {
     background: linear-gradient(135deg, #0b1220, #111827);
     color: #e5e7eb;
@@ -1285,7 +1242,7 @@ tbody td {
     left: 100%;
 }
 
-/* Trinity-style sweep effect on hover */
+    /* Effetto metallico */
 .dark-card::before,
 .scheda-scura::before {
     content: '';
@@ -1382,9 +1339,7 @@ tbody td {
     gap: 1rem;
 }
 
-/* ============================================
-   Landing - Enhancements & Animations
-   ============================================ */
+    /* Animazioni */
 
 .hero-title {
     font-size: clamp(2.25rem, 5vw, 3rem);
@@ -1460,7 +1415,7 @@ tbody td {
     overflow-y: auto;
 }
 
-/* Don't override background when popup has dark styling */
+/* Stili aggiunti per evitare conflitti */
 .corpo-popup.scheda-scura {
     background: #111827;
     color: #e5e7eb;
@@ -1494,7 +1449,7 @@ tbody td {
     opacity: 0.7;
 }
 
-/* FAQ (details/summary) */
+/* FAQ */
 .faq details,
 .domande-frequenti details {
     background: #0f172a;
@@ -1536,7 +1491,7 @@ tbody td {
     animation: fadeIn 0.4s ease-out;
 }
 
-/* Logo chips (optional placeholders) */
+/* Loghino degli html */
 .logo-chip {
     display: inline-flex;
     align-items: center;
@@ -1550,9 +1505,7 @@ tbody td {
     margin: 0.25rem;
 }
 
-/* ============================================
-     Inspired Header & Mobile Nav (Glass/Sticky)
-     ============================================ */
+    /* header e parte mobile */
 
 .container,
 .contenitore { max-width: 1160px; margin: 0 auto; padding: 0 20px; }
@@ -1641,9 +1594,7 @@ tbody td {
     to { opacity: 1; transform: translateY(0); }
 }
 
-/* ============================================
-   Animations (Trinity-inspired)
-   ============================================ */
+    /* Animazioni aggiuntive */
 
 @keyframes fadeInUp{
   from{opacity:0;transform:translateY(30px)}
@@ -1665,7 +1616,7 @@ tbody td {
   100%{background-position:200% center}
 }
 
-/* Trinity-style gradient text */
+    /* testo in gradiente */
 .gradient,
 .testo-sfumato {
     background: linear-gradient(90deg, var(--primary), #06b6d4);
@@ -1676,7 +1627,7 @@ tbody td {
     background-size: 200% auto;
 }
 
-/* Hero animations with staggered delays */
+    /* animazioni in entrata */
 .hero-animate-1,
 .animazione-entrata-1 { 
     animation: fadeInUp 0.8s ease-out;
@@ -1687,7 +1638,7 @@ tbody td {
 
 .hero-right { animation: fadeInRight 1s ease-out 0.5s both; }
 
-/* Badge hover effects (Trinity style) */
+    /* Stili aggiuntivi */
 .badge-hover {
   transition: all 0.3s ease;
 }
