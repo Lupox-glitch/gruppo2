@@ -163,9 +163,11 @@ def handle_update_profile(user_id, data):
 
 def add_cv_content(user_id, data):
 
+    patente = sanitize_input (data.get('patente','').strip())
     hobby = sanitize_input(data.get('summary', '').strip())
     skills = sanitize_input(data.get('skills', '').strip())
     languages = sanitize_input(data.get('languages', '').strip())
+
     
     # connessione al db
     conn = get_db_connection()
@@ -173,8 +175,8 @@ def add_cv_content(user_id, data):
     
 
     cursor.execute(
-        'UPDATE cv_data SET hobby = %s, skills = %s, languages = %s WHERE user_id = %s',
-        (hobby, skills, languages, user_id)
+        'UPDATE cv_data SET patente = %s, hobby = %s, skills = %s, languages = %s WHERE user_id = %s',
+        (patente, hobby, skills, languages, user_id)
     )
 
     conn.commit()
@@ -399,6 +401,7 @@ def get_user_dashboard_data(user_id):
         'success_message': '',
         'error_message': '',
         'cv_section': _render_cv_section(cv_data),
+        'cv_patente': cv_data.get('patente',''),
         'cv_hobby': cv_data.get('hobby', ''),
         'cv_skills': cv_data.get('skills', ''),
         'cv_languages': cv_data.get('languages', ''),

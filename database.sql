@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS cv_data (
     citta VARCHAR(100),
     nazionalita VARCHAR(100),
     linkedin_url VARCHAR(255),
+    patente VARCHAR(100),
     hobby TEXT,
     skills TEXT,
     languages TEXT,

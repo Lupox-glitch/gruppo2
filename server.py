@@ -432,7 +432,6 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
             })
 
         elif path == '/login':
-            # Show login page regardless of session state (optionally could redirect if logged in)
             self._render_template('templates/login.html', {
                 'error': session.get('error', ''),
                 'success': session.get('success', '')
@@ -473,7 +472,7 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
             from handlers import get_admin_dashboard_data
 
             data = get_admin_dashboard_data()
-            # Add admin session info to context
+            # aggiunge le info dell'admin
             data['user_nome'] = session.get('nome', 'Admin')
             data['user_cognome'] = session.get('cognome', 'Sistema')
             self._render_template('templates/admin-dashboard.html', data)
