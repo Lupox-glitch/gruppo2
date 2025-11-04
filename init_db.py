@@ -1,9 +1,3 @@
-#!/usr/bin/env python3
-"""
-Script per inizializzare il database MySQL con tabelle e utenti di test.
-Usa le funzioni già presenti in database.py.
-"""
-
 from database import create_tables, create_default_users
 
 

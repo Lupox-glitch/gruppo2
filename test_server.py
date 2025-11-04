@@ -1,8 +1,3 @@
-#!/usr/bin/env python3
-"""
-Quick test to verify server starts and handles requests
-"""
-
 import sys
 import time
 import urllib.request

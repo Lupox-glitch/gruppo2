@@ -1,10 +1,3 @@
-#!/usr/bin/env python3
-"""
-CV Management System - Pure Python Server
-No frameworks, only standard library
-"""
-
-
 import http.server
 import http.cookies
 import urllib.parse
@@ -16,7 +9,7 @@ import re
 from datetime import datetime, timedelta
 from pathlib import Path
 
-# Configuration
+# Configurazione Server
 HOST = 'localhost'
 PORT = 8080
 BASE_DIR = Path(__file__).parent
@@ -30,21 +23,21 @@ UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 SECRET_KEY = secrets.token_hex(32)
 
-# Session storage (in-memory, for simplicity)
+# archivio della sessione (in-memory, for simplicity)
 SESSIONS = {}
 
-# Ensure database schema exists at startup (safe: uses IF NOT EXISTS)
+# verifica che lo schema del database esista 
 try:
     from database import create_tables
     create_tables()
     print("✓ Database schema ensured")
 except Exception as e:
-    # Don't crash the server on startup; surface a helpful message instead.
+    #se non c'e' lo schema del database da un warning al posto di spegnere tutto
     print(f"Database init warning: {e}")
 
-
+    
 class CVHandler(http.server.BaseHTTPRequestHandler):
-    """HTTP Request Handler for CV Management System"""
+    """GESTIONE DELLE RICHIESTE HTTP"""
     
     def _set_headers(self, content_type='text/html', status=200):
         """Set HTTP headers"""
@@ -56,7 +49,7 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
         self.end_headers()
     
     def _get_session(self):
-        """Get current session data"""
+        """Get dei dati della sessione corrente"""
         cookies = http.cookies.SimpleCookie(self.headers.get('Cookie'))
         session_id = cookies.get('session_id')
         if session_id and session_id.value in SESSIONS:
@@ -70,7 +63,7 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
         return {}
     
     def _create_session(self, user_data):
-        """Create new session and return cookie string"""
+        """crea una nuova sessione e ritorna i cookie"""
         session_id = secrets.token_urlsafe(32)
         expires = (datetime.now() + timedelta(hours=24)).timestamp()
         SESSIONS[session_id] = {
@@ -78,7 +71,7 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
             'expires': expires
         }
         
-        # Return cookie string (don't send header yet)
+        # Return cookie  
         cookie = http.cookies.SimpleCookie()
         cookie['session_id'] = session_id
         cookie['session_id']['path'] = '/'
@@ -87,7 +80,7 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
         return cookie['session_id'].OutputString()
     
     def _destroy_session(self):
-        """Destroy current session and return cookie string"""
+        """elimina la sessione corrente e ritorna i cookie"""
         cookies = http.cookies.SimpleCookie(self.headers.get('Cookie'))
         session_id = cookies.get('session_id')
         if session_id and session_id.value in SESSIONS:
@@ -101,7 +94,7 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
         return cookie['session_id'].OutputString()
     
     def _redirect(self, location, set_cookie=None):
-        """Redirect to another page"""
+        """Redirect"""
         self.send_response(302)
         self.send_header('Location', location)
         if set_cookie:
@@ -109,7 +102,7 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
         self.end_headers()
     
     def _render_template(self, template_path, context=None):
-        """Simple template rendering"""
+        """visualizza i template"""
         if context is None:
             context = {}
         
@@ -121,7 +114,7 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
         with open(template_file, 'r', encoding='utf-8') as f:
             content = f.read()
         
-     # Simple variable replacement {{variable}}
+     # rimpiazza le variabili --> {{variable}}
         for key, value in context.items():
             if str(value) == 'None':
                 content = content.replace('{{'+ key +'}}', '')
@@ -161,7 +154,7 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
         self.wfile.write(html.encode('utf-8'))
     
     def _parse_post_data(self):
-        """Parse POST data from request"""
+        """lettura POST data"""
         content_length = int(self.headers.get('Content-Length', 0))
         if content_length == 0:
             return {}
@@ -182,9 +175,7 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
         return {}
     
     def _parse_multipart(self):
-        """Parse multipart form data (simplified)"""
-        # This is a simplified version
-        # For production, use a proper multipart parser
+        """Ordina i dati letti in _parse_post_data """
         content_length = int(self.headers.get('Content-Length', 0))
         boundary = self.headers.get('Content-Type').split('boundary=')[1]
         
@@ -213,7 +204,7 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
         return {'form': form_data, 'files': files}
     
     def _serve_static(self, path):
-        """Serve static files (CSS, JS, etc.)"""
+        """manda i contenuti statici (CSS / HTML) in base alla richiesta che riceviamo """
         file_path = BASE_DIR / path.lstrip('/')
         
         if not file_path.exists() or not file_path.is_file():
@@ -232,7 +223,7 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
 
 
 
-
+######################################################## inizio Gestione upload / Download CV .pdf ##########################################################################
 
     ## AGGIUNTA: Gestione upload CV ##
     def _handle_upload_cv_form(self):
@@ -322,11 +313,9 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
         conn.commit()
         conn.close()
 
-
-
-
-
         self._send_json({'success': True, 'message': 'CV caricato con successo!'})
+
+
    ## AGGIUNTA: Gestione download CV ###
     def _handle_download_cv(self, user_id):
         from database import get_cv_file
@@ -394,12 +383,12 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
 
         self._send_json({'success': True, 'message': 'CV eliminato con successo'})
 
-
+######################################################## Fine Gestione upload / Download CV .pdf ##########################################################################
 
 
 
     def do_GET(self):
-        """Handle GET requests"""
+        """gestisce le richieste GET"""
         parsed_path = urllib.parse.urlparse(self.path)
         path = parsed_path.path
         query = dict(urllib.parse.parse_qsl(parsed_path.query))
@@ -469,6 +458,7 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
                 return
             
             from handlers import get_user_dashboard_data
+
             data = get_user_dashboard_data(session.get('user_id'))
             self._render_template('templates/user-dashboard.html', data)
         
@@ -481,6 +471,7 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
                 return
             
             from handlers import get_admin_dashboard_data
+
             data = get_admin_dashboard_data()
             # Add admin session info to context
             data['user_nome'] = session.get('nome', 'Admin')
@@ -499,6 +490,7 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
                 return
             
             from handlers import get_admin_view_student_data
+
             data = get_admin_view_student_data(int(student_id))
             
             if not data:
@@ -519,7 +511,7 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
         
 
 
-########################### Gestione Download e Cancellazione CV########################################################
+########################### Gestione Download e Cancellazione CV ########################################################
         elif path.startswith('/api/download-cv'):
             user_id = query.get('user_id')
             if not user_id:
@@ -527,6 +519,8 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
                 return
             self._handle_download_cv(user_id)
             return
+        
+
         elif path == '/api/delete-cv':
             session = self._get_session()
             if not session.get('user_id'):
@@ -548,7 +542,7 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
     
     
     def do_POST(self):
-        """Handle POST requests"""
+        """gestisce le richieste POST"""
         parsed_path = urllib.parse.urlparse(self.path)
         path = parsed_path.path
         
@@ -571,16 +565,16 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
             handle_admin_delete_user
         )
         
-        # Route handling
-        # Form-based login (HTML)
+######################################################## inizio gestione Login e Register ##########################################################################
+        # login basato su un form (HTML)
         if path == '/login':
             result = handle_login(post_data)
             if result['success']:
                 cookie = self._create_session(result['user'])
-                # Redirect to appropriate dashboard
+                # Redirect alla dashboard appropriata
                 self._redirect(result['redirect'], set_cookie=cookie)
             else:
-                # Re-render login page with error message
+                # mostra login page con messaggio di errore
                 self._render_template('templates/login.html', {
                     'error': result.get('error', ''),
                     'success': ''
@@ -599,11 +593,11 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
             else:
                 self._send_json({'success': False, 'error': result['error']}, 400)
         
-        # Form-based register (HTML)
+        # registrazione basata su form  (HTML)
         elif path == '/register':
             result = handle_register(post_data)
             if result['success']:
-                # After registration, show login with success message
+                # dopo la registrazione mostra la login page con messaggio 
                 self._render_template('templates/login.html', {
                     'error': '',
                     'success': result.get('message', 'Registrazione completata!')
@@ -621,7 +615,11 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
             else:
                 self._send_json({'success': False, 'error': result['error']}, 400)
         
+######################################################## fine gestione Login e Register ##########################################################################
+       
 
+
+######################################################## inizio gestione Profilo Utente ##########################################################################
         elif path == '/api/update-profile':
             if not session.get('user_id'):
                 self._send_json({'success': False, 'error': 'Non autenticato'}, 401)
@@ -654,8 +652,23 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
 
             result = handle_delete_experience(session.get('user_id'), exp_id)
             self._send_json(result)
-        
 
+
+        elif path == '/api/cv-content':
+            # mostra i CV content salvati (hobby, skills, languages) come JSON per gli utenti loggati
+            if not session.get('user_id'):
+                self._redirect('/login')
+                return
+            
+            form_data = post_data.get('form', post_data) if isinstance(post_data, dict) and 'form' in post_data else post_data
+            from handlers import add_cv_content
+            result =add_cv_content(session.get('user_id'), form_data)
+            self._redirect('/user-dashboard')
+        
+######################################################## fine gestione Profilo Utente ###########################################################################       
+
+
+        
         elif path == '/api/admin/delete-user':
                 if not session.get('user_id') or session.get('role') != 'admin':
                     self._send_json({'success': False, 'error': 'Non autorizzato'}, 403)
@@ -676,20 +689,9 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
                 self._send_json(result)
         
 
-        elif path == '/api/cv-content':
-            # Return current CV content (hobby, skills, languages) as JSON for the logged-in user
-            if not session.get('user_id'):
-                self._redirect('/login')
-                return
-            # For cv-content, use form data (flatten if multipart)
-            form_data = post_data.get('form', post_data) if isinstance(post_data, dict) and 'form' in post_data else post_data
-            from handlers import add_cv_content
-            result =add_cv_content(session.get('user_id'), form_data)
-            self._redirect('/user-dashboard')
 
 
-
-#################### PARTE CREAZIONE E DOWNLOAD CV PDF ##############################
+#################### INIZIO CREAZIONE E DOWNLOAD CV PDF ##############################
         elif path == '/api/generate-cv':
             if not session.get('user_id'):
                 self._send_json({'success': False, 'error': 'Non autenticato'}, 401)
@@ -717,7 +719,9 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
             self._handle_upload_cv_form()
             return
 
-##########################################################################################
+##################### FINE CREAZIONE E DOWNLOAD CV PDF #####################################################################
+
+
 
     def log_message(self, format, *args):
         """Log HTTP requests"""
@@ -725,7 +729,7 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
 
 
 def init_database():
-    """Initialize database (MySQL)"""
+    """inizializza il database (MySQL)"""
     from database import create_tables, create_default_users
     create_tables()
     create_default_users()
@@ -733,11 +737,11 @@ def init_database():
 
 
 def main():
-    """Start the server"""
-    # Create necessary directories
+    """avvia il server"""
+    # Crea le directory necessarie
     UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
     
-    # Initialize database
+    # chiama l'inizializzazione del database
     init_database()
     
     # Start server
@@ -748,8 +752,8 @@ def main():
 ║  🚀 Server started at: http://{HOST}:{PORT}               ║
 ║                                                            ║
 ║  👤 Test Accounts:                                         ║
-║     Admin:    admin@cvmanagement.it / admin123             ║
-║     Student:  student@test.it / student123                 ║
+║     Admin:    admin@cvmanagement.it / Admin123!            ║
+║     Student:  student@test.it / Student123!                ║
 ║                                                            ║
 ║  Press Ctrl+C to stop                                      ║
 ╚════════════════════════════════════════════════════════════╝

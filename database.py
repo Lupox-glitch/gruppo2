@@ -41,18 +41,18 @@ def salt_generation (length=16):
 
 
 def hash_password(password,salt):
-    """Hash password using SHA-256 (in production, use bcrypt)"""
+    """Hash password usando SHA-256 """
     # Simple hash for demo - in production use bcrypt or argon2
     return hashlib.sha256((password + salt).encode()).hexdigest()
 
 
 def verify_password(password, hashed , salt):
-    """Verify password against hash"""
+    """verifica la password"""
     return hash_password(password,salt) == hashed
 
 
 def create_tables():
-    """Create database tables in MySQL (if they don't exist)."""
+    """crea le tabelle del database  in MySQL (se non esistono gia')."""
     conn = get_db_connection()
     cursor = conn.cursor()
 
@@ -127,7 +127,7 @@ def create_tables():
 
 
 
-def create_default_users():
+def create_default_users():  ## creazione di un utente admin e uno studente di default -- questo punto e' l'unico in cui si possono creare utenti admin 
     conn = get_db_connection()
     cursor = conn.cursor()
 
@@ -167,62 +167,6 @@ def create_default_users():
 
 
 
-# Query functions with prepared statements
-def execute_query(query, params=None):
-    """Execute a query safely with parameters"""
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-    if params:
-        cursor.execute(query, params)
-    else:
-        cursor.execute(query)
-    result = cursor.fetchall()
-    conn.close()
-    return result
-
-
-
-# Security functions
-def sanitize_input(text):
-    """Sanitize user input (basic XSS prevention)"""
-    if not text:
-        return ''
-    # Replace dangerous characters
-    replacements = {
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#x27;',
-        './': '&#x2F;',
-        ';': '&#59;',
-        ':': '&#58;'
-    }
-    for old, new in replacements.items():
-        text = text.replace(old, new)
-    return text
-
-
-def validate_email(email):
-    """Basic email validation"""
-    import re
-    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-    return re.match(pattern, email) is not None
-
-
-def validate_password(password):
-    """Validate password strength"""
-    if len(password) < 8:
-        return False, "La password deve contenere almeno 8 caratteri"
-    if not any(c.isupper() for c in password):
-        return False, "La password deve contenere almeno una lettera maiuscola"
-    if not any(c.islower() for c in password):
-        return False, "La password deve contenere almeno una lettera minuscola"
-    if not any(c.isdigit() for c in password):
-        return False, "La password deve contenere almeno un numero"
-    return True, ""
-
-
-
 # === Gestione eliminazione CV ===
 def get_cv_by_id(cv_id):
     """Restituisce un singolo record CV"""
@@ -256,4 +200,49 @@ def get_cv_file(user_id):
     cursor.close()
     conn.close()
     return row[0] if row else None
+# =================================
+
+
+############################################### funzioni di sicurezza ################################################## 
+def sanitize_input(text):
+    """Sanitize user input"""
+    if not text:
+        return ''
+
+    replacements = {
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#x27;',
+        './': '&#x2F;',
+        ';': '&#59;',
+        ':': '&#58;'
+    }
+    for old, new in replacements.items():
+        text = text.replace(old, new)
+    return text
+
+
+def validate_email(email):
+    """controlla che il formato della mail sia generalmente utile """
+    import re
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return re.match(pattern, email) is not None
+
+
+def validate_password(password):
+    """contolla la sicurezza della password"""
+    if len(password) < 8:
+        return False, "La password deve contenere almeno 8 caratteri"
+    if not any(c.isupper() for c in password):
+        return False, "La password deve contenere almeno una lettera maiuscola"
+    if not any(c.islower() for c in password):
+        return False, "La password deve contenere almeno una lettera minuscola"
+    if not any(c.isdigit() for c in password):
+        return False, "La password deve contenere almeno un numero"
+    return True, ""
+
+
+
+
 

@@ -1,8 +1,3 @@
-"""
-Request handlers for CV Management System
-All functions use prepared statements for SQL injection prevention
-"""
-
 import os
 from pathlib import Path
 from datetime import datetime
@@ -15,9 +10,11 @@ UPLOAD_DIR = Path(__file__).parent / 'uploads' / 'cv'
 ALLOWED_EXTENSIONS = {'pdf'}
 MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
 
+############################### Inizio Gestione Login / REGISTRAZIONE###################################################
 
 def handle_login(data):
-    """Handle user login with prepared statements"""
+    """gestisce il login con prepared statement"""
+
     email = data.get('email', '').strip()
     password = data.get('password', '')
     
@@ -28,7 +25,8 @@ def handle_login(data):
     if not validate_email(email):
         return {'success': False, 'error': 'Email non valida'}
     
-    # Query with prepared statement
+    # Query con prepared statement
+
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute('SELECT * FROM users WHERE email = %s', (email,))
@@ -55,7 +53,7 @@ def handle_login(data):
 
 
 def handle_register(data):
-    """Handle user registration with prepared statements"""
+    """gestisce la registrazione con i prepared statement"""
     nome = sanitize_input(data.get('nome', '').strip())
     cognome = sanitize_input(data.get('cognome', '').strip())
     email = data.get('email', '').strip()
@@ -79,7 +77,7 @@ def handle_register(data):
     if password != password_confirm:
         return {'success': False, 'error': 'Le password non corrispondono'}
     
-    # Check if email exists (prepared statement)
+    # Check se la mail esiste 
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute('SELECT id FROM users WHERE email = %s', (email,))
@@ -87,7 +85,7 @@ def handle_register(data):
         conn.close()
         return {'success': False, 'error': 'Questa email è già registrata'}
     
-    # Insert new user (prepared statement)
+    # inserisci un nuovo utente
     salt=salt_generation()
     password_hash = hash_password(password,salt)
     cursor.execute(
@@ -97,7 +95,7 @@ def handle_register(data):
     
     user_id = cursor.lastrowid
     
-    # Create cv_data entry
+    # crea entry per cv_data
     cursor.execute('INSERT INTO cv_data (user_id) VALUES (%s)', (user_id,))
     
     conn.commit()
@@ -105,7 +103,11 @@ def handle_register(data):
     
     return {'success': True}
 
+############################### Fine Gestione Login / REGISTRAZIONE#####################################################
 
+
+
+################################### inzio Gestione DATI DEL USER #######################################################
 def handle_update_profile(user_id, data):
     """Handle profile update with prepared statements"""
     nome = sanitize_input(data.get('nome', '').strip())
@@ -127,19 +129,19 @@ def handle_update_profile(user_id, data):
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     
-    # Check if email is used by another user (prepared statement)
+    # check se la mail e' usata da un altro utente
     cursor.execute('SELECT id FROM users WHERE email = %s AND id != %s', (email, user_id))
     if cursor.fetchone():
         conn.close()
         return {'success': False, 'error': 'Questa email è già utilizzata'}
     
-    # Update users table (prepared statement)
+    # aggiorna la tabella users 
     cursor.execute(
         'UPDATE users SET nome = %s, cognome = %s, email = %s WHERE id = %s',
         (nome, cognome, email, user_id)
     )
     
-    # Update cv_data (prepared statement)
+    # aggiorna cv_data 
     cursor.execute('SELECT id FROM cv_data WHERE user_id = %s', (user_id,))
     cv_exists = cursor.fetchone()
     
@@ -160,6 +162,7 @@ def handle_update_profile(user_id, data):
     return {'success': True, 'message': 'Profilo aggiornato con successo!'}
 
 def add_cv_content(user_id, data):
+
     hobby = sanitize_input(data.get('summary', '').strip())
     skills = sanitize_input(data.get('skills', '').strip())
     languages = sanitize_input(data.get('languages', '').strip())
@@ -181,7 +184,8 @@ def add_cv_content(user_id, data):
 
 
 def handle_add_experience(user_id, data):
-    """Handle adding experience with prepared statements"""
+    """gestisce l'aggiunta di nuove esperienze con i prepared statements"""
+
     tipo = data.get('tipo', '').strip()
     titolo = sanitize_input(data.get('titolo', '').strip())
     azienda_istituto = sanitize_input((data.get('azienda_istituto') or data.get('azienda') or '').strip())
@@ -206,7 +210,7 @@ def handle_add_experience(user_id, data):
     if is_current:
         data_fine = None
     
-    # Insert experience (prepared statement)
+    # inserisci nuova esperienza
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     cursor.execute(
@@ -220,18 +224,64 @@ def handle_add_experience(user_id, data):
     return {'success': True, 'message': 'Esperienza aggiunta con successo!'}
 
 
+def handle_update_experience(user_id, experience_id, data):
+    """Aggiorna un'esperienza esistente (proprietà dell'utente obbligatoria)"""
+    titolo = sanitize_input(data.get('titolo', '').strip())
+    azienda_istituto = sanitize_input(data.get('azienda_istituto', '').strip())
+    data_inizio = data.get('data_inizio', '').strip()
+    data_fine = data.get('data_fine', '').strip()
+    is_current = 1 if data.get('is_current') else 0
+    descrizione = sanitize_input(data.get('descrizione', '').strip())
+    tipo = data.get('tipo', '').strip()
+
+    if tipo not in ['lavoro', 'formazione']:
+        return {'success': False, 'error': 'Tipo di esperienza non valido'}
+
+    if not all([titolo, azienda_istituto, data_inizio]):
+        return {'success': False, 'error': 'Titolo, azienda/istituto e data inizio sono obbligatori'}
+
+    if not is_current and not data_fine:
+        return {'success': False, 'error': 'Data di fine obbligatoria se non in corso'}
+
+    if is_current:
+        data_fine = None
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        # Verifico proprietà
+        cursor.execute('SELECT id FROM experiences WHERE id = %s AND user_id = %s', (experience_id, user_id))
+        if not cursor.fetchone():
+            return {'success': False, 'error': 'Esperienza non trovata o non autorizzato'}
+
+        # Aggiorno esperienza
+        cursor.execute(
+            'UPDATE experiences SET tipo = %s, titolo = %s, azienda_istituto = %s, data_inizio = %s, data_fine = %s, is_current = %s, descrizione = %s, updated_at = CURRENT_TIMESTAMP WHERE id = %s AND user_id = %s',
+            (tipo, titolo, azienda_istituto, data_inizio, data_fine, is_current, descrizione, experience_id, user_id)
+        )
+
+        conn.commit()
+        return {'success': True, 'message': 'Esperienza aggiornata con successo!'}
+    except Exception as e:
+        conn.rollback()
+        return {'success': False, 'error': str(e)}
+    finally:
+        conn.close()
+
+
 def handle_delete_experience(user_id, experience_id):
     """Handle deleting experience with prepared statements"""
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     
-    # Verify ownership (prepared statement)
+    # Verifica il proprietario
     cursor.execute('SELECT id FROM experiences WHERE id = %s AND user_id = %s', (experience_id, user_id))
     if not cursor.fetchone():
         conn.close()
         return {'success': False, 'error': 'Esperienza non trovata'}
     
-    # Delete (prepared statement)
+    # cancella
     cursor.execute('DELETE FROM experiences WHERE id = %s AND user_id = %s', (experience_id, user_id))
     
     conn.commit()
@@ -241,7 +291,7 @@ def handle_delete_experience(user_id, experience_id):
 
 
 def _render_experiences(experiences, tipo):
-    """Render experiences list HTML"""
+    """mostra la lista di esperienze per HTML"""
     filtered = [exp for exp in experiences if exp.get('tipo') == tipo]
     
     if not filtered:
@@ -265,19 +315,21 @@ def _render_experiences(experiences, tipo):
     
     html += '</div>'
     return html
+################################### Fine Gestione DATI DEL USER ########################################################
 
 
 
+######################################## gestione delle Dashboard ######################################################
 def get_user_dashboard_data(user_id):
-    """Get all data for user dashboard"""
+    """recupera tutti i dati per la user dashboard"""
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     
-    # Get user data (prepared statement)
+    # recupero dati utente 
     cursor.execute('SELECT * FROM users WHERE id = %s', (user_id,))
     user = dict(cursor.fetchone())
     
-    # Get CV data
+    # recupero dati CV
     cursor.execute(
         'SELECT * FROM cv_data WHERE user_id = %s',
         (user_id,)
@@ -285,7 +337,7 @@ def get_user_dashboard_data(user_id):
     cv_data = cursor.fetchone()
     cv_data = dict(cv_data) if cv_data else {}
     
-    # Get experiences
+    # recupero esperienze
     cursor.execute(
         'SELECT * FROM experiences WHERE user_id = %s ORDER BY data_inizio DESC',
         (user_id,)
@@ -325,7 +377,7 @@ def get_user_dashboard_data(user_id):
     cv_list_html += '</ul>'
 
 
-    # Sanitize output
+    # Sanifica output
     for key in user:
         if isinstance(user[key], str):
             user[key] = sanitize_input(user[key])
@@ -334,7 +386,7 @@ def get_user_dashboard_data(user_id):
         if isinstance(cv_data[key], str):
             cv_data[key] = sanitize_input(cv_data[key])
 
-    # Flatten data for template
+    # prepara i dati per la gestione dei template
     context = {
         'user_nome': user.get('nome', ''),
         'user_cognome': user.get('cognome', ''),
@@ -369,14 +421,15 @@ def get_admin_dashboard_data():
     cursor.execute(
         """
         SELECT u.id, u.email, u.password_hash, u.salt, u.nome, u.cognome, u.role,
-               cv.telefono, cv.data_nascita, cv.indirizzo, cv.cv_file_path,
+               cv.telefono, cv.data_nascita, cv.indirizzo, ucv.cv_file_path,
                COUNT(e.id) as total_experiences
         FROM users u
         LEFT JOIN cv_data cv ON u.id = cv.user_id
         LEFT JOIN experiences e ON u.id = e.user_id
+        LEFT JOIN user_cvs ucv ON u.id = ucv.user_id
         WHERE u.role = 'student'
         GROUP BY u.id, u.email, u.password_hash, u.salt, u.nome, u.cognome, u.role,
-                 cv.telefono, cv.data_nascita, cv.indirizzo, cv.cv_file_path
+                 cv.telefono, cv.data_nascita, cv.indirizzo, ucv.cv_file_path
         """
     )
     students = cursor.fetchall()
@@ -385,7 +438,7 @@ def get_admin_dashboard_data():
     cursor.execute("SELECT COUNT(*) as total FROM users WHERE role = 'student'")
     total_students = cursor.fetchone()['total']
     
-    cursor.execute("SELECT COUNT(DISTINCT user_id) as total FROM cv_data WHERE cv_file_path IS NOT NULL") 
+    cursor.execute("SELECT COUNT(user_id) as total FROM user_cvs WHERE cv_file_path IS NOT NULL") 
     students_with_cv = cursor.fetchone()['total']
     
     cursor.execute("SELECT COUNT(*) as total FROM experiences WHERE tipo = 'lavoro'")
@@ -410,12 +463,22 @@ def get_admin_dashboard_data():
     }
 
 def _render_students_table(students):
-    """Render students table rows HTML"""
+    """crea la tabella degli utenti HTML"""
     if not students:
         return '<tr><td colspan="8" class="text-center">Nessuno studente registrato</td></tr>'
     
     html = ''
+    # creazione di una lista dove gli utenti con piu' cv caricati non siano ripetuti
+    studenti_nonripetuti = {}
     for student in students:
+        student_id = student.get('id')
+        if student_id is not None:
+            studenti_nonripetuti[student_id] = student
+
+    lista_studenti = list(studenti_nonripetuti.values())
+
+
+    for student in lista_studenti:
         cv_status = '✓' if student.get('cv_file_path') else '✗'
         html += f'''
         <tr>
@@ -435,8 +498,6 @@ def _render_students_table(students):
         '''
     
     return html
-
-
 
 
 
@@ -477,7 +538,7 @@ def get_admin_view_student_data(student_id):
     if cv_files:
         cv_section_html = '<div class="cv-list">'
         for cv in cv_files:
-            cv_path = cv['file_path']
+            cv_path = cv['cv_file_path']
             file_name = os.path.basename(cv_path)
             cv_section_html += f'''
             <div class="cv-item">
@@ -593,8 +654,11 @@ def handle_admin_delete_user(user_id):
     return {'success': True, 'message': 'Utente eliminato con successo'}
 
 
+######################################## fine gestione delle Dashboard #################################################
 
-############################## GESTIONE CV PDF ############################################
+
+
+############################## GESTIONE CREAZIONE CV PDF ###########################################
 
 # handlers.py
 from pdf_generator import generate_cv_pdf
@@ -606,22 +670,23 @@ def handle_download_cv(user_id):
     except Exception as e:
         return {'success': False, 'error': str(e)}
 
-################################################################################################
+
+####################################################################################################
 
 def get_cv_data(user_id):
-    """Get CV data for a specific user"""
+    """prende i dati del CV per una persona specifici"""
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     
     try:
-        # Get user data
+        # ricava i dati dell'utente
         cursor.execute(
             'SELECT u.*, cv.* FROM users u LEFT JOIN cv_data cv ON u.id = cv.user_id WHERE u.id = %s',
             (user_id,)
         )
         user_data = cursor.fetchone()
         
-        # Get experiences
+        # ricava i dati delle esperienze
         cursor.execute(
             'SELECT * FROM experiences WHERE user_id = %s ORDER BY data_inizio DESC',
             (user_id,)
@@ -642,47 +707,4 @@ def get_cv_data(user_id):
 
 
 
-def handle_update_experience(user_id, experience_id, data):
-    """Aggiorna un'esperienza esistente (proprietà dell'utente obbligatoria)"""
-    titolo = sanitize_input(data.get('titolo', '').strip())
-    azienda_istituto = sanitize_input(data.get('azienda_istituto', '').strip())
-    data_inizio = data.get('data_inizio', '').strip()
-    data_fine = data.get('data_fine', '').strip()
-    is_current = 1 if data.get('is_current') else 0
-    descrizione = sanitize_input(data.get('descrizione', '').strip())
-    tipo = data.get('tipo', '').strip()
 
-    if tipo not in ['lavoro', 'formazione']:
-        return {'success': False, 'error': 'Tipo di esperienza non valido'}
-
-    if not all([titolo, azienda_istituto, data_inizio]):
-        return {'success': False, 'error': 'Titolo, azienda/istituto e data inizio sono obbligatori'}
-
-    if not is_current and not data_fine:
-        return {'success': False, 'error': 'Data di fine obbligatoria se non in corso'}
-
-    if is_current:
-        data_fine = None
-
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-
-    try:
-        # Verifico proprietà
-        cursor.execute('SELECT id FROM experiences WHERE id = %s AND user_id = %s', (experience_id, user_id))
-        if not cursor.fetchone():
-            return {'success': False, 'error': 'Esperienza non trovata o non autorizzato'}
-
-        # Aggiorno esperienza
-        cursor.execute(
-            'UPDATE experiences SET tipo = %s, titolo = %s, azienda_istituto = %s, data_inizio = %s, data_fine = %s, is_current = %s, descrizione = %s, updated_at = CURRENT_TIMESTAMP WHERE id = %s AND user_id = %s',
-            (tipo, titolo, azienda_istituto, data_inizio, data_fine, is_current, descrizione, experience_id, user_id)
-        )
-
-        conn.commit()
-        return {'success': True, 'message': 'Esperienza aggiornata con successo!'}
-    except Exception as e:
-        conn.rollback()
-        return {'success': False, 'error': str(e)}
-    finally:
-        conn.close()
