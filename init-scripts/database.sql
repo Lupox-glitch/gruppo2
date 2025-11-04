@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS experiences (
 CREATE TABLE IF NOT EXISTS user_cvs (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
-    cv_path_file VARCHAR(255) NOT NULL,
+    cv_file_path VARCHAR(255) NOT NULL,
     uploaded_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     INDEX idx_user_id (user_id),

@@ -18,11 +18,11 @@ from datetime import datetime
 # MySQL configuration from environment
 import mysql.connector
 
-MYSQL_HOST = os.getenv('MYSQL_HOST', 'localhost')
-MYSQL_PORT = int(os.getenv('MYSQL_PORT', '3306'))
-MYSQL_USER = os.getenv('MYSQL_USER', 'root')                    # dipende da come lo setti nel sistema  
-MYSQL_PASSWORD = os.getenv('MYSQL_PASSWORD', '110605')          # dipende da come lo setti nel sistema 
-MYSQL_DB = os.getenv('MYSQL_DB', 'cv_management')
+MYSQL_HOST = os.getenv('DB_HOST') # Usa DB_HOST 
+MYSQL_PORT = int(os.getenv('DB_PORT', '3306')) # In docker-compose non serve DB_PORT, 3306 è default
+MYSQL_USER = os.getenv('DB_USER')              
+MYSQL_PASSWORD = os.getenv('DB_PASSWORD')     
+MYSQL_DB = os.getenv('DB_NAME') # Usa DB_NAME
 
 def get_db_connection():
     conn = mysql.connector.connect(

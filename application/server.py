@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 # Configurazione Server
-HOST = 'localhost'
+HOST = '0.0.0.0'
 PORT = 8080
 BASE_DIR = Path(__file__).parent
 UPLOAD_DIR = BASE_DIR / 'uploads' / 'cv'
@@ -625,7 +625,11 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
                 return
             
             result = handle_update_profile(session.get('user_id'), post_data)
-            self._send_json(result)
+            if result.get('success'):
+                self._redirect(result.get('redirect'))
+            else:
+                self._send_json(result)
+
         
         elif path == '/api/add-experience':
             if not session.get('user_id'):
@@ -634,7 +638,11 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
             
           
             result = handle_add_experience(session.get('user_id'), post_data)
-            self._send_json(result)
+            if result.get('success'):
+                self._redirect(result.get('redirect'))
+            else:
+                self._send_json(result)
+
         
 
 
@@ -650,7 +658,11 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
                 return
 
             result = handle_delete_experience(session.get('user_id'), exp_id)
-            self._send_json(result)
+            if result.get('success'):
+                self._redirect(result.get('redirect'))
+            else:
+                self._send_json(result)
+        
 
 
         elif path == '/api/cv-content':

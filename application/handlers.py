@@ -158,8 +158,9 @@ def handle_update_profile(user_id, data):
     
     conn.commit()
     conn.close()
-    
-    return {'success': True, 'message': 'Profilo aggiornato con successo!'}
+    redirect = '/user-dashboard'
+    return {'success': True, 'message': 'Profilo aggiornato con successo!', 'redirect': redirect}
+
 
 def add_cv_content(user_id, data):
 
@@ -209,6 +210,12 @@ def handle_add_experience(user_id, data):
     if is_current==0 and not data_fine:
         return {'success': False, 'error': 'Data di fine obbligatoria se non in corso'}
     
+
+    valid_period= data_inizio <= data_fine
+    
+    if not valid_period and not is_current:
+        return {'success' : False, 'error' : 'le date non rispettano un intervallo di tempo valido'}
+    
     if is_current:
         data_fine = None
     
@@ -222,8 +229,8 @@ def handle_add_experience(user_id, data):
     
     conn.commit()
     conn.close()
-    
-    return {'success': True, 'message': 'Esperienza aggiunta con successo!'}
+    redirect = '/user-dashboard'
+    return {'success': True, 'message': 'esperienza aggiunta con successo!', 'redirect': redirect}
 
 
 def handle_update_experience(user_id, experience_id, data):
@@ -288,8 +295,10 @@ def handle_delete_experience(user_id, experience_id):
     
     conn.commit()
     conn.close()
-    
-    return {'success': True, 'message': 'Esperienza eliminata con successo!'}
+
+
+    redirect = '/user-dashboard'
+    return {'success': True, 'message': 'esperienza eliminata con successo!', 'redirect': redirect}
 
 
 def _render_experiences(experiences, tipo):
