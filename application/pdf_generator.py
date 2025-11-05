@@ -52,22 +52,33 @@ def _fetch_user_full(user_id):
     conn.close()
     return user, cv, experiences
 
-# === Callback per sfondo e footer ===
+# === Callback per sfondo, nome e footer ===
 def draw_background_and_footer(canvas, doc):
+    """Disegna sfondo, nome centrato e footer."""
     canvas.saveState()
-    left_x = doc.leftMargin
-    left_y = doc.bottomMargin + 2 * cm 
+
+    width, height = A4
+    margin = doc.leftMargin
+
+    # === SFONDO GRIGIO SINISTRO ===
+    left_x = margin
+    left_y = doc.bottomMargin + 2.8 * cm
     left_width = 6 * cm
-    left_height = A4[1] - doc.topMargin - doc.bottomMargin - 3 * cm
+    left_height = height - doc.topMargin - doc.bottomMargin - 4 * cm
     canvas.setFillColor(colors.HexColor('#F5F5F5'))
     canvas.rect(left_x, left_y, left_width, left_height, fill=True, stroke=False)
 
-    # Footer centrato in basso
+    # === NOME CENTRATO ===
+    canvas.setFont("Helvetica-Bold", 26)
+    canvas.setFillColor(colors.HexColor("#2E86AB"))
+    full_name = getattr(doc, "user_fullname", "Utente Sconosciuto")
+    canvas.drawCentredString(width / 2.0, height - 2 * cm, full_name)
+
+    # === FOOTER CENTRATO ===
     canvas.setFont("Helvetica-Oblique", 9)
     footer_text = f"Generato il {datetime.now().strftime('%d/%m/%Y %H:%M')}"
-    text_width = canvas.stringWidth(footer_text, "Helvetica-Oblique", 9)
     canvas.setFillColor(colors.gray)
-    canvas.drawString((A4[0] - text_width) / 2, 1.2 * cm, footer_text)
+    canvas.drawCentredString(width / 2.0, 1.2 * cm, footer_text)
 
     canvas.restoreState()
 
@@ -90,7 +101,7 @@ def generate_cv_pdf(user_id):
         gap = 0.5 * cm
         right_width = width - left_width - gap - (2 * margin)
 
-        vertical_offset = 3.5 * cm
+        vertical_offset = 4.5 * cm
 
         left_frame = Frame(
             margin, margin + vertical_offset, left_width, height - 2 * margin - vertical_offset,
@@ -119,9 +130,6 @@ def generate_cv_pdf(user_id):
 
         # === HEADER ===
         full_name = f"{sanitize_input(user.get('nome'))} {sanitize_input(user.get('cognome'))}".strip()
-        story.append(Spacer(1, 1.5 * cm))  # spazio extra sopra
-        story.append(Paragraph(full_name or "Utente Sconosciuto", styles['Header']))
-        story.append(Spacer(1, 1 * cm))
 
         # === COLONNA SINISTRA ===
         left_story = []
@@ -199,6 +207,7 @@ def generate_cv_pdf(user_id):
         story.extend(right_story)
 
         # === Build PDF ===
+        doc.user_fullname = full_name or "Utente Sconosciuto"
         doc.build(story)
         buffer.seek(0)
         return buffer.read()
