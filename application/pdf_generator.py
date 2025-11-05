@@ -11,21 +11,31 @@ from reportlab.platypus import (
 )
 from database import get_db_connection
 
-# === LOGGER CONFIG ===
 logger = logging.getLogger(__name__)
 
-# === SANITIZATION ===
+# === Sanitizzazione ===
 def sanitize_input(text):
-    """Rimuove tag o caratteri potenzialmente pericolosi mantenendo la formattazione base."""
     if not text:
         return ""
     cleaned = str(text)
     cleaned = cleaned.replace('<', '&lt;').replace('>', '&gt;')
-    cleaned = re.sub(r'[\x00-\x1f\x7f]', '', cleaned)  # rimuove caratteri di controllo invisibili
+    cleaned = re.sub(r'[\x00-\x1f\x7f]', '', cleaned)
     return cleaned.strip()
 
+# === Testo o liste separate da virgole ===
+def add_text_or_list(story, title, text, styles):
+    story.append(Paragraph(title, styles['SectionTitle']))
+    if not text:
+        story.append(Paragraph("Nessun dato inserito", styles['Body']))
+        return
+    if ',' in text:
+        for item in [t.strip() for t in text.split(',') if t.strip()]:
+            story.append(Paragraph(f"• {sanitize_input(item)}", styles['Body']))
+    else:
+        story.append(Paragraph(sanitize_input(text), styles['Body']))
+    story.append(Spacer(1, 10))
 
-# === DB FETCH ===
+# === DB ===
 def _fetch_user_full(user_id):
     conn = get_db_connection()
     cur = conn.cursor(dictionary=True)
@@ -42,35 +52,27 @@ def _fetch_user_full(user_id):
     conn.close()
     return user, cv, experiences
 
-
-# === CALLBACK per disegnare sfondo colonna sinistra ===
-def draw_background(canvas, doc):
-    """Disegna lo sfondo grigio nella colonna sinistra."""
+# === Callback per sfondo e footer ===
+def draw_background_and_footer(canvas, doc):
     canvas.saveState()
     left_x = doc.leftMargin
-    left_y = doc.bottomMargin
+    left_y = doc.bottomMargin + 2 * cm 
     left_width = 6 * cm
-    left_height = A4[1] - doc.topMargin - doc.bottomMargin
+    left_height = A4[1] - doc.topMargin - doc.bottomMargin - 3 * cm
     canvas.setFillColor(colors.HexColor('#F5F5F5'))
     canvas.rect(left_x, left_y, left_width, left_height, fill=True, stroke=False)
+
+    # Footer centrato in basso
+    canvas.setFont("Helvetica-Oblique", 9)
+    footer_text = f"Generato il {datetime.now().strftime('%d/%m/%Y %H:%M')}"
+    text_width = canvas.stringWidth(footer_text, "Helvetica-Oblique", 9)
+    canvas.setFillColor(colors.gray)
+    canvas.drawString((A4[0] - text_width) / 2, 1.2 * cm, footer_text)
+
     canvas.restoreState()
 
-# === Competenze e lingue ===
-def add_text_or_list(story, title, text, styles):
-    story.append(Paragraph(title, styles['SectionTitle']))
-    if not text:
-        story.append(Paragraph("Nessun dato inserito", styles['Body']))
-        return
-    if ',' in text:
-        for item in [t.strip() for t in text.split(',') if t.strip()]:
-            story.append(Paragraph(f"• {sanitize_input(item)}", styles['Body']))
-    else:
-        story.append(Paragraph(sanitize_input(text), styles['Body']))
-    story.append(Spacer(1, 10))
-
-
-# === PDF GENERATOR ===
-def generate_cv_pdf(user_id):
+# === Generatore PDF ===
+def generate_cv_pdf_twocolumn(user_id):
     """Genera un CV in layout a due colonne e restituisce i bytes del PDF."""
     try:
         if not isinstance(user_id, int):
@@ -80,22 +82,22 @@ def generate_cv_pdf(user_id):
         if not user:
             raise ValueError(f"Utente non trovato (user_id={user_id})")
 
-        buffer = BytesIO()
-
         # === Layout ===
+        buffer = BytesIO()
         width, height = A4
         margin = 1.5 * cm
         left_width = 6 * cm
         gap = 0.5 * cm
         right_width = width - left_width - gap - (2 * margin)
 
-        # Frame sinistro e destro
+        vertical_offset = 3.5 * cm
+
         left_frame = Frame(
-            margin, margin, left_width, height - 2 * margin,
+            margin, margin + vertical_offset, left_width, height - 2 * margin - vertical_offset,
             leftPadding=10, rightPadding=10, topPadding=10, bottomPadding=10, id='left'
         )
         right_frame = Frame(
-            margin + left_width + gap, margin, right_width, height - 2 * margin,
+            margin + left_width + gap, margin + vertical_offset, right_width, height - 2 * margin - vertical_offset,
             leftPadding=10, rightPadding=10, topPadding=10, bottomPadding=10, id='right'
         )
 
@@ -106,21 +108,20 @@ def generate_cv_pdf(user_id):
         styles.add(ParagraphStyle(name='SectionTitle', fontSize=13, textColor=colors.HexColor('#2E86AB'),
                                   spaceBefore=10, spaceAfter=6, leading=14))
         styles.add(ParagraphStyle(name='Body', fontSize=10.5, textColor=colors.HexColor('#333333'), leading=13))
-        styles.add(ParagraphStyle(name='Small', fontSize=9, textColor=colors.gray, alignment=1))
 
-        # === Documento con due frame ===
         doc = BaseDocTemplate(buffer, pagesize=A4,
                               leftMargin=margin, rightMargin=margin,
                               topMargin=margin, bottomMargin=margin)
-        template = PageTemplate(id='TwoCol', frames=[left_frame, right_frame], onPage=draw_background)
+        template = PageTemplate(id='TwoCol', frames=[left_frame, right_frame], onPage=draw_background_and_footer)
         doc.addPageTemplates([template])
 
         story = []
 
         # === HEADER ===
         full_name = f"{sanitize_input(user.get('nome'))} {sanitize_input(user.get('cognome'))}".strip()
+        story.append(Spacer(1, 1.5 * cm))  # spazio extra sopra
         story.append(Paragraph(full_name or "Utente Sconosciuto", styles['Header']))
-        story.append(Spacer(1, 8))
+        story.append(Spacer(1, 1 * cm))
 
         # === COLONNA SINISTRA ===
         left_story = []
@@ -147,31 +148,15 @@ def generate_cv_pdf(user_id):
 
         for line in contact_lines:
             left_story.append(Paragraph(line, styles['Body']))
-
         left_story.append(Spacer(1, 10))
 
-        # Competenze
+        # Competenze, Lingue, Patenti
         add_text_or_list(left_story, "Competenze", cv.get('skills', ''), styles)
-
-        # Lingue
         add_text_or_list(left_story, "Lingue", cv.get('languages', ''), styles)
+        add_text_or_list(left_story, "Patenti", cv.get('patente', ''), styles)
 
         # === COLONNA DESTRA ===
         right_story = []
-
-        # Esperienze lavorative
-        work = [e for e in experiences if e['tipo'] == 'lavoro']
-        if work:
-            right_story.append(Paragraph("Esperienze Lavorative", styles['SectionTitle']))
-            for e in work:
-                periodo = f"{e['data_inizio']} - {'In corso' if e['is_current'] else (e.get('data_fine') or '')}"
-                titolo = sanitize_input(e.get('titolo'))
-                azienda = sanitize_input(e.get('azienda_istituto'))
-                right_story.append(Paragraph(f"<b>{titolo}</b> — {azienda}", styles['Body']))
-                right_story.append(Paragraph(periodo, styles['Body']))
-                if e.get('descrizione'):
-                    right_story.append(Paragraph(sanitize_input(e['descrizione']), styles['Body']))
-                right_story.append(Spacer(1, 6))
 
         # Formazione
         edu = [e for e in experiences if e['tipo'] == 'formazione']
@@ -188,13 +173,29 @@ def generate_cv_pdf(user_id):
                     right_story.append(Paragraph(sanitize_input(e['descrizione']), styles['Body']))
                 right_story.append(Spacer(1, 6))
 
-        # Footer
-        right_story.append(Spacer(1, 12))
-        right_story.append(Paragraph(f"Generato il {datetime.now().strftime('%d/%m/%Y %H:%M')}", styles['Small']))
+        # Esperienze lavorative
+        work = [e for e in experiences if e['tipo'] == 'lavoro']
+        if work:
+            right_story.append(Paragraph("Esperienze Lavorative", styles['SectionTitle']))
+            for e in work:
+                periodo = f"{e['data_inizio']} - {'In corso' if e['is_current'] else (e.get('data_fine') or '')}"
+                titolo = sanitize_input(e.get('titolo'))
+                azienda = sanitize_input(e.get('azienda_istituto'))
+                right_story.append(Paragraph(f"<b>{titolo}</b> — {azienda}", styles['Body']))
+                right_story.append(Paragraph(periodo, styles['Body']))
+                if e.get('descrizione'):
+                    right_story.append(Paragraph(sanitize_input(e['descrizione']), styles['Body']))
+                right_story.append(Spacer(1, 6))
+
+        # Informazioni personali (hobby)
+        if cv.get('hobby'):
+            right_story.append(Spacer(1, 6))
+            right_story.append(Paragraph("Informazioni personali", styles['SectionTitle']))
+            right_story.append(Paragraph(sanitize_input(cv['hobby']), styles['Body']))
 
         # === Combina ===
         story.extend(left_story)
-        story.append(FrameBreak())  # passa alla colonna destra
+        story.append(FrameBreak())
         story.extend(right_story)
 
         # === Build PDF ===
