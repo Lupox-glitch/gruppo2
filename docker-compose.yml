@@ -42,13 +42,14 @@ services:
     
     volumes:
       # Mappa la directory locale di upload al percorso interno del container
-      - ./uploads/cv:/usr/src/app/uploads/cv 
+      - upload:/usr/src/app/uploads/cv 
 
 
 
 # --- Definizione dei volumi e delle reti ---
 volumes:
   db_data:
+  upload:
 
 networks:
   app-network:
