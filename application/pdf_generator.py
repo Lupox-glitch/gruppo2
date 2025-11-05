@@ -104,7 +104,7 @@ def generate_cv_pdf(user_id):
         vertical_offset = 4.5 * cm
 
         left_frame = Frame(
-            margin + left_width + gap, margin + vertical_offset, left_width, height - 2 * margin - vertical_offset,
+            margin, margin + vertical_offset, left_width, height - 2 * margin - vertical_offset,
             leftPadding=10, rightPadding=10, topPadding=10, bottomPadding=10, id='left'
         )
         right_frame = Frame(
