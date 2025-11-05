@@ -8,13 +8,12 @@ services:
     container_name: my_mysql_db
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: RootPassword! # <-- METTI LA TUA PASSWORD QUI
+      MYSQL_ROOT_PASSWORD: RootPassword!
       MYSQL_DATABASE: cv_management
     volumes:
-      # Monta la tua cartella ./init-scripts (che contiene database.sql) 
-      # nella directory di inizializzazione di MySQL
+
       - ./init-scripts:/docker-entrypoint-initdb.d:ro
-      # Volume persistente per salvare i dati del DB anche se il container viene rimosso
+
       - db_data:/var/lib/mysql
     networks:
       - app-network
@@ -23,25 +22,25 @@ services:
 
   # --- Servizio Applicazione Python ---
   app:
-    # Costruisce l'immagine a partire dal Dockerfile nella directory ./application
+
     build: ./application 
     container_name: my_python_app
     ports:
-      - "8080:8080" # Mappa la porta 8080 locale alla porta 8080 del container
+      - "8080:8080"
       
     environment:
-      # Passa le credenziali e l'hostname del DB all'applicazione
+
       DB_HOST: db 
       DB_USER: root
-      DB_PASSWORD: RootPassword! # <-- METTI LA TUA PASSWORD QUI
+      DB_PASSWORD: RootPassword!
       DB_NAME: cv_management
     depends_on:
-      - db # Assicura che il DB sia avviato per primo
+      - db 
     networks:
       - app-network
     
     volumes:
-      # Mappa la directory locale di upload al percorso interno del container
+   
       - upload:/usr/src/app/uploads/cv 
 
 

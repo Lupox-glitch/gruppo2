@@ -1,4 +1,3 @@
--- Database Schema for CV Management System
 -- Create database
 CREATE DATABASE IF NOT EXISTS cv_management CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE cv_management;
@@ -11,8 +10,6 @@ CREATE TABLE IF NOT EXISTS users (
     salt VARCHAR(255) NOT NULL,
     nome VARCHAR(100) NOT NULL,
     cognome VARCHAR(100) NOT NULL,
---  nazionalita' la metto come dato del cv non dell'utente 
---  data_nascita che troviamo nei dati del cv inutile ripeterla 
     role ENUM('student', 'admin') DEFAULT 'student',
     INDEX idx_email (email),
     INDEX idx_role (role)
@@ -24,7 +21,6 @@ CREATE TABLE IF NOT EXISTS cv_data (
     user_id INT NOT NULL,
     telefono VARCHAR(20),
     indirizzo VARCHAR(255),
---  email gia' presente nell'utente 
     data_nascita DATE,
     citta VARCHAR(100),
     nazionalita VARCHAR(100),

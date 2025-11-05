@@ -62,7 +62,7 @@ def draw_background_and_footer(canvas, doc):
 
     # === SFONDO GRIGIO SINISTRO ===
     left_x = margin
-    left_y = doc.bottomMargin + 1 * cm
+    left_y = doc.bottomMargin + 8 * cm
     left_width = 6 * cm
     left_height = height - doc.topMargin - doc.bottomMargin - 6 * cm
     canvas.setFillColor(colors.HexColor('#F5F5F5'))
@@ -105,7 +105,7 @@ def generate_cv_pdf(user_id):
 
         left_frame = Frame(
             margin, margin + vertical_offset, left_width, height - 2 * margin - vertical_offset,
-            leftPadding=10, rightPadding=10, topPadding=10, bottomPadding=10, id='left'
+            leftPadding=10, rightPadding=10, topPadding=20, bottomPadding=10, id='left'
         )
         right_frame = Frame(
             margin + left_width + gap, margin + vertical_offset, right_width, height - 2 * margin - vertical_offset,
