@@ -72,7 +72,7 @@ def draw_background_and_footer(canvas, doc):
     canvas.restoreState()
 
 # === Generatore PDF ===
-def generate_cv_pdf_twocolumn(user_id):
+def generate_cv_pdf(user_id):
     """Genera un CV in layout a due colonne e restituisce i bytes del PDF."""
     try:
         if not isinstance(user_id, int):

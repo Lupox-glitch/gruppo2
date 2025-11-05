@@ -722,6 +722,7 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
             self.send_header('Content-Disposition', f'attachment; filename="cv_{session["user_id"]}.pdf"')  ### file name da cambiare (mettere tipo il nome dell'utente)
             self.end_headers()
             self.wfile.write(result['pdf_bytes'])
+            
 
         elif path == '/api/upload-cv':
             if not session.get('user_id'):
