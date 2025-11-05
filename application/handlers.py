@@ -36,7 +36,7 @@ def handle_login(data):
     if not user or not verify_password(password, user['password_hash'],user['salt']):
         return {'success': False, 'error': 'Email o password non corretti'}
     
-    # Successful login
+    # login riuscito
     redirect = '/admin-dashboard' if user['role'] == 'admin' else '/user-dashboard'
     
     return {
@@ -564,7 +564,7 @@ def get_admin_view_student_data(student_id):
         cv_section_html = '<p class="text-muted">Nessun CV caricato.</p>'
 ########################################################################################################################
     
-    # Render work experiences
+    # Render esperienze lavorative
     work_exp = [exp for exp in experiences if exp.get('tipo') == 'lavoro']
     if work_exp:
         work_exp_html = '<div class="experiences-list">'
@@ -585,7 +585,7 @@ def get_admin_view_student_data(student_id):
     else:
         work_exp_html = '<p class="text-muted">Nessuna esperienza lavorativa.</p>'
     
-    # Render education experiences
+    # Render esperienze formative
     edu_exp = [exp for exp in experiences if exp.get('tipo') == 'formazione']
     if edu_exp:
         edu_exp_html = '<div class="experiences-list">'
@@ -645,7 +645,7 @@ def handle_admin_delete_user(user_id):
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
     
-    # Verify user exists and is a student
+    # verifica che l'utente esista e non sia uno studente
     cursor.execute('SELECT id, role FROM users WHERE id = %s', (user_id,))
     user = cursor.fetchone()
     
@@ -657,7 +657,7 @@ def handle_admin_delete_user(user_id):
         conn.close()
         return {'success': False, 'error': 'Non è possibile eliminare amministratori'}
     
-    # Delete user (CASCADE will handle related records)
+    # elimina utente
     cursor.execute('DELETE FROM users WHERE id = %s', (user_id,))
     
     conn.commit()
@@ -672,7 +672,7 @@ def handle_admin_delete_user(user_id):
 
 ############################## GESTIONE CREAZIONE CV PDF ###########################################
 
-# handlers.py
+
 from pdf_generator import generate_cv_pdf
 
 def handle_download_cv(user_id):

@@ -10,6 +10,13 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: RootPassword!
       MYSQL_DATABASE: cv_management
+
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "-u", "root", "-pRootPassword!"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      
     volumes:
 
       - ./init-scripts:/docker-entrypoint-initdb.d:ro
@@ -35,7 +42,8 @@ services:
       DB_PASSWORD: RootPassword!
       DB_NAME: cv_management
     depends_on:
-      - db 
+      db :
+        condition: service_healthy
     networks:
       - app-network
     

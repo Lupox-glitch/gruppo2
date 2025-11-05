@@ -32,12 +32,15 @@ try:
     create_tables()
     print("✓ Database schema ensured")
 except Exception as e:
-    #se non c'e' lo schema del database da un warning al posto di spegnere tutto
+    #se non c'e' lo schema del database da' un warning al posto di spegnere tutto
     print(f"Database init warning: {e}")
 
     
 class CVHandler(http.server.BaseHTTPRequestHandler):
     """GESTIONE DELLE RICHIESTE HTTP"""
+   # nasconde versioni del server e di python
+    server_version="volevi sapere la versione eh O_O"
+    sys_version = ""
     
     def _set_headers(self, content_type='text/html', status=200):
         """Set HTTP headers"""
@@ -54,11 +57,10 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
         session_id = cookies.get('session_id')
         if session_id and session_id.value in SESSIONS:
             session = SESSIONS[session_id.value]
-            # Check expiration
+            # Check scadenza della sessione
             if session.get('expires', 0) > datetime.now().timestamp():
                 return session
             else:
-                # Expired session
                 del SESSIONS[session_id.value]
         return {}
     
@@ -76,7 +78,7 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
         cookie['session_id'] = session_id
         cookie['session_id']['path'] = '/'
         cookie['session_id']['httponly'] = True
-        cookie['session_id']['max-age'] = 86400  # 24 hours
+        cookie['session_id']['max-age'] = 86400  # 24 ore
         return cookie['session_id'].OutputString()
     
     def _destroy_session(self):
@@ -161,7 +163,7 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
         
         post_data = self.rfile.read(content_length).decode('utf-8', errors='replace')
         
-        # Check content type
+    
         content_type = self.headers.get('Content-Type', '')
         
         if 'application/x-www-form-urlencoded' in content_type:
@@ -169,7 +171,7 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
         elif 'application/json' in content_type:
             return json.loads(post_data)
         elif 'multipart/form-data' in content_type:
-            # Handle multipart (for file uploads)
+            
             return self._parse_multipart()
         
         return {}
@@ -187,12 +189,12 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
         
         for part in parts:
             if b'Content-Disposition' in part:
-                # Extract field name
+                
                 disposition = part.split(b'\r\n')[1].decode()
                 if 'name="' in disposition:
                     name = disposition.split('name="')[1].split('"')[0]
                     
-                    # Check if it's a file
+                
                     if b'filename="' in part:
                         filename = disposition.split('filename="')[1].split('"')[0]
                         content = part.split(b'\r\n\r\n', 1)[1].rsplit(b'\r\n', 1)[0]
@@ -211,7 +213,7 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
             self._send_error(404, "File not found")
             return
         
-        # Get mime type
+      
         mime_type, _ = mimetypes.guess_type(str(file_path))
         if not mime_type:
             mime_type = 'application/octet-stream'
@@ -225,7 +227,7 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
 
 ######################################################## inizio Gestione upload / Download CV .pdf ##########################################################################
 
-    ## AGGIUNTA: Gestione upload CV ##
+    
     def _handle_upload_cv_form(self):
 
         session=self._get_session()
@@ -393,14 +395,14 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
         path = parsed_path.path
         query = dict(urllib.parse.parse_qsl(parsed_path.query))
         
-        # Get session
+        
         session = self._get_session()
         
-        # Route handling
+        
         if path in ['/', '/home', '/index']:
-            # Always show homepage, even if logged in
+            # mostra sempre la homepage anche se l'utente e' gia' loggato
             if session.get('user_id'):
-                # Welcome for logged-in users
+                # Welcome per gli utenti loggati
                 welcome_section = f"""
 <h1>Benvenuto, {session.get('nome','')} {session.get('cognome','')}</h1>
 <p>Accedi rapidamente alla tua area.</p>
@@ -416,7 +418,7 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
 <a href="/logout" class="btn btn-secondary">Logout</a>
 """
             else:
-                # Generic homepage for guests
+                # homepage generica
                 welcome_section = """
 <h1>Sistema Gestione CV</h1>
 <p>Gestisci facilmente il tuo curriculum e le tue esperienze.</p>
@@ -447,7 +449,6 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
         
 
         elif path == '/privacy':
-            # Privacy & GDPR page
             self._render_template('templates/privacy.html')
         
 
@@ -504,7 +505,7 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
             cookie = self._destroy_session()
             self._redirect('/', set_cookie=cookie)
         
-        # Static files
+        
         elif path.startswith('/css/') or path.startswith('/js/') or path.startswith('/uploads/'):
             self._serve_static(path)
         
@@ -565,6 +566,7 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
         )
         
 ######################################################## inizio gestione Login e Register ##########################################################################
+        
         # login basato su un form (HTML)
         if path == '/login':
             result = handle_login(post_data)
@@ -606,7 +608,7 @@ class CVHandler(http.server.BaseHTTPRequestHandler):
                     'error': result.get('error', '')
                 })
 
-        # JSON API register
+        # JSON API registrazione
         elif path == '/api/register':
             result = handle_register(post_data)
             if result['success']:
@@ -763,7 +765,7 @@ def main():
 ║  📄 CV Management System - Python Server                   ║
 ║  🚀 Server started at: http://{HOST}:{PORT}               ║
 ║                                                            ║
-║  👤 Test Accounts:                                         ║
+║  👤 Default Accounts:                                         ║
 ║     Admin:    admin@cvmanagement.it / Admin123!            ║
 ║     Student:  student@test.it / Student123!                ║
 ║                                                            ║

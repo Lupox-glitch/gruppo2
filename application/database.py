@@ -1,28 +1,16 @@
-"""
-Database module for CV Management System
-Switched from SQLite to MySQL.
-
-Configuration via environment variables (with sensible defaults):
-  - MYSQL_HOST (default: localhost)
-  - MYSQL_PORT (default: 3306)
-  - MYSQL_USER (default: root)
-  - MYSQL_PASSWORD (default: empty)
-  - MYSQL_DB (default: cv_management)
-"""
-
 import os
 import hashlib
 from datetime import datetime
 
 
-# MySQL configuration from environment
+# MySQL configurazioni tramite environment
 import mysql.connector
 
-MYSQL_HOST = os.getenv('DB_HOST') # Usa DB_HOST 
-MYSQL_PORT = int(os.getenv('DB_PORT', '3306')) # In docker-compose non serve DB_PORT, 3306 è default
+MYSQL_HOST = os.getenv('DB_HOST') 
+MYSQL_PORT = int(os.getenv('DB_PORT', '3306')) 
 MYSQL_USER = os.getenv('DB_USER')              
 MYSQL_PASSWORD = os.getenv('DB_PASSWORD')     
-MYSQL_DB = os.getenv('DB_NAME') # Usa DB_NAME
+MYSQL_DB = os.getenv('DB_NAME') 
 
 def get_db_connection():
     conn = mysql.connector.connect(
@@ -156,7 +144,7 @@ def create_default_users():  ## creazione di un utente admin e uno studente di d
     
     student_id = cursor.lastrowid
     
-    # Create cv_data entry for student
+    # crea cv_data entry per gli studenti
     cursor.execute(
         'INSERT INTO cv_data (user_id, telefono, citta) VALUES (%s, %s, %s)',
         (student_id, '+39 123 456 7890', 'Milano')
