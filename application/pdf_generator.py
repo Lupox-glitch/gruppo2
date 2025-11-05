@@ -55,6 +55,19 @@ def draw_background(canvas, doc):
     canvas.rect(left_x, left_y, left_width, left_height, fill=True, stroke=False)
     canvas.restoreState()
 
+# === Competenze e lingue ===
+def add_text_or_list(story, title, text, styles):
+    story.append(Paragraph(title, styles['SectionTitle']))
+    if not text:
+        story.append(Paragraph("Nessun dato inserito", styles['Body']))
+        return
+    if ',' in text:
+        for item in [t.strip() for t in text.split(',') if t.strip()]:
+            story.append(Paragraph(f"• {sanitize_input(item)}", styles['Body']))
+    else:
+        story.append(Paragraph(sanitize_input(text), styles['Body']))
+    story.append(Spacer(1, 10))
+
 
 # === PDF GENERATOR ===
 def generate_cv_pdf(user_id):
@@ -138,18 +151,10 @@ def generate_cv_pdf(user_id):
         left_story.append(Spacer(1, 10))
 
         # Competenze
-        left_story.append(Paragraph("Competenze", styles['SectionTitle']))
-        skills = ["Python", "Linux", "Docker", "Networking", "Cybersecurity"]  # da prendere le info nel db --- nel db sono viste come formato TEXT 
-        for s in skills:
-            left_story.append(Paragraph(f"• {sanitize_input(s)}", styles['Body']))
-
-        left_story.append(Spacer(1, 10))
+        add_text_or_list(left_story, "Competenze", cv.get('skills', ''), styles)
 
         # Lingue
-        left_story.append(Paragraph("Lingue", styles['SectionTitle']))
-        langs = ["Italiano (Madrelingua)", "Inglese (B2)"]  # da prendere le info nel ---- nel db sono viste come formato TEXT 
-        for l in langs:
-            left_story.append(Paragraph(f"• {sanitize_input(l)}", styles['Body']))
+        add_text_or_list(left_story, "Lingue", cv.get('languages', ''), styles)
 
         # === COLONNA DESTRA ===
         right_story = []
